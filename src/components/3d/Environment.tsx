@@ -5,7 +5,6 @@ import { RigidBody } from '@react-three/rapier';
 type V3 = [number, number, number];
 
 const WOOD = '#c79b69';
-const WOOD_DARK = '#8b5e34';
 const WALL = '#f2efe7';
 const FLOOR = '#e7e2d7';
 const CONCRETE = '#aaa59b';
@@ -62,15 +61,10 @@ function TrackLight({ position, rotation = [0, 0, 0] }: { position: V3; rotation
         <cylinderGeometry args={[0.09, 0.11, 0.28, 10]} />
         <meshStandardMaterial color={BLACK} roughness={0.35} />
       </mesh>
-      <spotLight
-        position={[0, -0.18, 0]}
-        angle={0.5}
-        penumbra={0.85}
-        intensity={0.55}
-        distance={7}
-        color="#fff3d6"
-        castShadow={false}
-      />
+      <mesh position={[0, -0.17, 0]}>
+        <circleGeometry args={[0.07, 10]} />
+        <meshBasicMaterial color="#fff2cf" />
+      </mesh>
     </group>
   );
 }
@@ -108,7 +102,7 @@ function HangingWoodLight({ position, length = 4.6 }: { position: V3; length?: n
         <boxGeometry args={[length - 0.18, 0.025, 0.12]} />
         <meshStandardMaterial color="#fff5d7" emissive="#ffe3a1" emissiveIntensity={1.05} />
       </mesh>
-      <pointLight position={[0, -0.28, 0]} intensity={0.4} distance={6} color="#ffe8bd" />
+      
     </group>
   );
 }
@@ -160,8 +154,9 @@ function SimpleChair({ position, rotation = [0, 0, 0] }: { position: V3; rotatio
 
 function Planter({ position, length = 3.2, depth = 0.72, height = 0.68 }: { position: V3; length?: number; depth?: number; height?: number }) {
   const leaves = useMemo(() => {
-    return Array.from({ length: Math.max(8, Math.round(length * 4)) }, (_, i) => {
-      const t = i / Math.max(1, Math.round(length * 4) - 1);
+    return Array.from({ length: Math.max(5, Math.min(7, Math.round(length * 2))) }, (_, i) => {
+      const count = Math.max(5, Math.min(7, Math.round(length * 2)));
+      const t = i / Math.max(1, count - 1);
       const x = -length / 2 + 0.2 + t * (length - 0.4);
       const z = ((i % 3) - 1) * depth * 0.19;
       const y = height + 0.22 + (i % 4) * 0.06;
@@ -181,12 +176,6 @@ function Planter({ position, length = 3.2, depth = 0.72, height = 0.68 }: { posi
             <sphereGeometry args={[p.scale, 8, 6]} />
             <meshStandardMaterial color={p.color} roughness={0.9} />
           </mesh>
-          {i % 4 === 0 && (
-            <mesh position={[0, 0.18, 0]} rotation={[0, 0, 0.65]}>
-              <capsuleGeometry args={[0.035, 0.38, 4, 6]} />
-              <meshStandardMaterial color={GREEN[(i + 1) % GREEN.length]} roughness={0.95} />
-            </mesh>
-          )}
         </group>
       ))}
     </group>
@@ -386,7 +375,7 @@ function GlassWall({ position, width = 8, height = 4.2, rotation = [0,0,0] }: { 
     <group position={position} rotation={rotation}>
       <mesh>
         <boxGeometry args={[width, height, 0.04]} />
-        <meshPhysicalMaterial color={GLASS} transparent opacity={0.17} roughness={0.08} transmission={0.45} />
+        <meshStandardMaterial color={GLASS} transparent opacity={0.16} roughness={0.32} depthWrite={false} />
       </mesh>
       {Array.from({ length: Math.floor(width / 1.55) + 1 }).map((_, i, arr) => {
         const x = -width / 2 + (i / (arr.length - 1)) * width;
