@@ -54,10 +54,10 @@ export function StartOverlay() {
 
           {/* Lore description box */}
           <div className="bg-white border-2 border-inset border-slate-600 p-3 text-xs leading-relaxed text-slate-800 mb-6 font-mono">
-            <p className="font-bold text-red-600 mb-1">CẢNH BÁO SỰ CỐ TOÀN CÔNG TY:</p>
+            <p className="font-bold text-red-600 mb-1">UID GÒ DẦU • HỘI THI LỒNG ĐÈN THỦ CÔNG:</p>
             <p>
-              Toàn bộ nhân sự được lệnh tự chế lồng đèn từ rác và ve chai trong văn phòng.
-              Tuy nhiên, có ai đó vừa cắm nồi lẩu điện vào trạm nguồn khiến Mặt Trăng sập kết nối.
+              Lầu 4 đã biến thành xưởng Trung Thu: bàn làm việc, chai nước, hộp thuốc, bao bì và dây LED đều có nguy cơ thành lồng đèn.
+              Và tất nhiên, có ai đó vừa cắm nồi lẩu điện vào trạm nguồn khiến Mặt Trăng sập kết nối.
             </p>
           </div>
 
