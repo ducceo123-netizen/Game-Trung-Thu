@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, type ReactNode } from 'react';
 import { Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -74,7 +74,7 @@ function BaseLantern({
   position: V3;
   name: string;
   color: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const payload = useRef<THREE.Group>(null);
   const lastPoke = useRef(0);
