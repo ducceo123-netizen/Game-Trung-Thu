@@ -4,7 +4,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { MULTIPLAYER_PLAYER_ID, MULTIPLAYER_ROOM_ID, supabase } from '../../lib/supabase';
-import { setMultiplayerChannel, type CombatAttackPayload } from '../../lib/multiplayerBus';
+import { setMultiplayerChannel, type CombatAttackPayload, type SocialChatPayload } from '../../lib/multiplayerBus';
 import { useGameStore, type LanternShapeMode } from '../../stores/useGameStore';
 import { useEconomyStore, type ShopItemId } from '../../stores/useEconomyStore';
 
@@ -24,6 +24,9 @@ type RemotePlayerState = {
   equippedItem: ShopItemId | null;
   health: number;
   isDead: boolean;
+  chatText: string;
+  chatMeme: string | null;
+  chatUntil: number;
 };
 
 function RemoteLantern({
@@ -142,6 +145,47 @@ function RemoteEquipment({ item }: { item: ShopItemId | null }) {
   );
 }
 
+
+function RemoteChatBubble({ text, meme }: { text: string; meme: string | null }) {
+  const [texture,setTexture]=useState<THREE.Texture|null>(null);
+
+  useEffect(()=>{
+    if(!meme){
+      setTexture(old=>{old?.dispose();return null;});
+      return;
+    }
+    let alive=true;
+    new THREE.TextureLoader().load(meme,next=>{
+      if(!alive){next.dispose();return;}
+      next.colorSpace=THREE.SRGBColorSpace;
+      setTexture(old=>{old?.dispose();return next;});
+    });
+    return()=>{alive=false;};
+  },[meme]);
+
+  if(!text && !meme) return null;
+
+  return (
+    <group position={[0,2.55,0]}>
+      <mesh>
+        <planeGeometry args={[1.8,meme?1.25:0.55]}/>
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.93}/>
+      </mesh>
+      {meme && (
+        <mesh position={[0,text?0.12:0,0.012]}>
+          <planeGeometry args={[1.45,0.9]}/>
+          <meshBasicMaterial map={texture??undefined} color={texture?'#ffffff':'#d1d5db'}/>
+        </mesh>
+      )}
+      {text && (
+        <Text position={[0,meme?-0.48:0,0.02]} fontSize={0.11} maxWidth={1.55} color="#111827" anchorX="center" anchorY="middle" textAlign="center">
+          {text}
+        </Text>
+      )}
+    </group>
+  );
+}
+
 function RemotePlayerAvatar({ player }: { player: RemotePlayerState }) {
   const group = useRef<THREE.Group>(null);
   const target = useRef(new THREE.Vector3(player.x, player.y, player.z));
@@ -229,6 +273,10 @@ function RemotePlayerAvatar({ player }: { player: RemotePlayerState }) {
         {!player.isDead && <RemoteEquipment item={player.equippedItem} />}
       </group>
 
+      {player.chatUntil > Date.now() && (
+        <RemoteChatBubble text={player.chatText} meme={player.chatMeme} />
+      )}
+
       <group position={[0, 1.92, 0]}>
         <mesh>
           <planeGeometry args={[1.42, 0.36]} />
@@ -314,6 +362,9 @@ export function MultiplayerPlayers() {
           equippedItem: (meta.equippedItem as ShopItemId) ?? null,
           health: Number(meta.health ?? 100),
           isDead: Boolean(meta.isDead),
+          chatText: '',
+          chatMeme: null,
+          chatUntil: 0,
         };
       }
 
@@ -371,6 +422,9 @@ export function MultiplayerPlayers() {
           equippedItem: null,
           health: 100,
           isDead: false,
+          chatText: '',
+          chatMeme: null,
+          chatUntil: 0,
         };
         return {
           ...prev,
@@ -389,6 +443,42 @@ export function MultiplayerPlayers() {
 
     channel.on('broadcast', { event: 'combat_attack' }, ({ payload }) => {
       receiveCombatAttack(payload as CombatAttackPayload);
+    });
+
+    channel.on('broadcast', { event: 'social_chat' }, ({ payload }) => {
+      const p=payload as SocialChatPayload;
+      if(!p.playerId || p.playerId===MULTIPLAYER_PLAYER_ID) return;
+
+      const local=useGameStore.getState();
+      if(p.floor!==local.currentFloor) return;
+      const dx=local.playerPosition[0]-p.x;
+      const dz=local.playerPosition[2]-p.z;
+      if(Math.hypot(dx,dz)>8) return;
+
+      setRemotePlayers(prev=>{
+        const existing=prev[p.playerId];
+        if(!existing) return prev;
+        return {
+          ...prev,
+          [p.playerId]:{
+            ...existing,
+            chatText:p.text.slice(0,120),
+            chatMeme:p.meme,
+            chatUntil:Date.now()+7000,
+          },
+        };
+      });
+
+      window.setTimeout(()=>{
+        setRemotePlayers(prev=>{
+          const existing=prev[p.playerId];
+          if(!existing || existing.chatUntil>Date.now()) return prev;
+          return {
+            ...prev,
+            [p.playerId]:{...existing,chatText:'',chatMeme:null,chatUntil:0},
+          };
+        });
+      },7100);
     });
 
     channel.on(
