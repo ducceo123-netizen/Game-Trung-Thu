@@ -16,6 +16,8 @@ export function RetroHUD() {
   const isBeautyMode = useGameStore((s) => s.isBeautyMode);
   const isSlowed = useGameStore((s) => s.isSlowed);
   const sodiumLevel = useGameStore((s) => s.sodiumLevel);
+  const onlineConnected = useGameStore((s) => s.onlineConnected);
+  const onlinePlayerCount = useGameStore((s) => s.onlinePlayerCount);
 
   const [isMuted, setIsMuted] = useState(sounds.getMuted());
 
@@ -36,6 +38,9 @@ export function RetroHUD() {
             <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse" />
             <span className="font-mono font-extrabold text-sm sm:text-base text-slate-900 tracking-wider">RẰM.exe</span>
             <span className="text-[11px] text-slate-600 font-mono">UID GÒ DẦU</span>
+            <span className={onlineConnected ? 'text-[11px] font-mono text-emerald-700' : 'text-[11px] font-mono text-red-700'}>
+              {onlineConnected ? `● ONLINE ${onlinePlayerCount}` : '● CONNECTING'}
+            </span>
           </div>
 
           <div className="bg-[#0f172a]/90 border border-slate-700 p-2.5 rounded max-w-xs text-xs font-mono text-slate-200">
