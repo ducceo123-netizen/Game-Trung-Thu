@@ -35,6 +35,10 @@ export function Player() {
   const startDialogue = useGameStore((s) => s.startDialogue);
   const activeDialogue = useGameStore((s) => s.activeDialogue);
   const setInteractionPrompt = useGameStore((s) => s.setInteractionPrompt);
+  const openWorkshop = useGameStore((s) => s.openWorkshop);
+  const personalLanternBuilt = useGameStore((s) => s.personalLanternBuilt);
+  const personalLanternLit = useGameStore((s) => s.personalLanternLit);
+  const lightPersonalLantern = useGameStore((s) => s.lightPersonalLantern);
   const questItems = useGameStore((s) => s.questItems);
   const collectedIds = useGameStore((s) => s.collectedItemIds);
   const collectItem = useGameStore((s) => s.collectItem);
@@ -379,7 +383,29 @@ export function Player() {
     }
     if (nearQuestItem) return;
 
-    // 3. Moon Server Machine check (near [0, 0, -17.5])
+    // 3. Personal Lantern Workshop check (Lầu 4 - Văn phòng Gò Dầu)
+    const workshopDist = playerPos.distanceTo(new THREE.Vector3(-3.35, 0.5, -12.6));
+    if (workshopDist < 3.0) {
+      if (!personalLanternBuilt) {
+        setInteractionPrompt({
+          text: '🏮 [E] Vào QUẦY LÀM LỒNG ĐÈN — Up ảnh của bạn',
+          action: () => openWorkshop(),
+        });
+      } else if (!personalLanternLit) {
+        setInteractionPrompt({
+          text: '✨ [E] THẮP SÁNG lồng đèn vừa làm',
+          action: () => lightPersonalLantern(),
+        });
+      } else {
+        setInteractionPrompt({
+          text: '📸 [E] Làm một lồng đèn khác từ ảnh mới',
+          action: () => openWorkshop(),
+        });
+      }
+      return;
+    }
+
+    // 4. Moon Server Machine check (near [0, 0, -17.5])
     const serverDist = playerPos.distanceTo(new THREE.Vector3(0, 0.5, -16.5));
     if (serverDist < 3.2) {
       if (collectedIds.length === 3) {
@@ -402,7 +428,7 @@ export function Player() {
       return;
     }
 
-    // 4. Lanterns proximity check
+    // 5. Lanterns proximity check
     const lanternDistances = [
       {
         name: 'LỒNG ĐÈN SALONPAS',
@@ -468,7 +494,7 @@ export function Player() {
     }
     if (nearLantern) return;
 
-    // 5. Rabbit check (Hiding rabbit near [-4.0, 0.5, 11])
+    // 6. Rabbit check (Hiding rabbit near [-4.0, 0.5, 11])
     const rabbitDist = playerPos.distanceTo(new THREE.Vector3(-4.0, 0.5, 11));
     if (rabbitDist < 2.2) {
       setInteractionPrompt({
