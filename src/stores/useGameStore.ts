@@ -99,6 +99,9 @@ interface GameState {
   booCooldownUntil: number | null;
   teamAnnouncement: string | null;
 
+  socialPostOpen: boolean;
+  socialPostSeen: boolean;
+
   setPlayerName: (name: string) => void;
   setGamePhase: (phase: GamePhase) => void;
   setCurrentFloor: (floor: 2 | 3) => void;
@@ -148,6 +151,9 @@ interface GameState {
   startBooChase: () => void;
   stopBooChase: () => void;
   setTeamAnnouncement: (message: string | null) => void;
+
+  openSocialPost: () => void;
+  closeSocialPost: () => void;
 }
 
 let achievementTimer: ReturnType<typeof setTimeout> | null = null;
@@ -207,6 +213,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   booActive: false,
   booCooldownUntil: null,
   teamAnnouncement: null,
+
+  socialPostOpen: false,
+  socialPostSeen: false,
 
   setPlayerName: (name) => set({ playerName: name.trim() || 'UID Player' }),
   setGamePhase: (phase) => set({ gamePhase: phase }),
@@ -586,4 +595,18 @@ export const useGameStore = create<GameState>((set, get) => ({
       announcementTimer = setTimeout(() => set({ teamAnnouncement: null }), 5500);
     }
   },
+
+  openSocialPost: () => {
+    const firstView = !get().socialPostSeen;
+    set({ socialPostOpen: true, socialPostSeen: true });
+    if (firstView) {
+      get().showAchievement({
+        id: 'uid_social_checkin',
+        title: '📱 UID SOCIAL CHECK-IN',
+        subtitle: 'Đã mở post UIDers mừng Quốc Khánh 2.9.2026.',
+      });
+    }
+  },
+
+  closeSocialPost: () => set({ socialPostOpen: false }),
 }));
