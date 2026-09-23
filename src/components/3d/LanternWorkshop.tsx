@@ -28,7 +28,7 @@ export function LanternWorkshop() {
           QUẦY LÀM LỒNG ĐÈN
         </Text>
         <Text position={[0, -0.15, 0.05]} fontSize={0.11} color="#d9f2f5" anchorX="center" anchorY="middle">
-          BẤM E • UP ẢNH • TỰ CHẾ MỘT CHIẾC
+          BẤM E • UP ẢNH • LÀM XONG CẦM ĐI LUÔN
         </Text>
       </group>
 
@@ -64,7 +64,7 @@ export function LanternWorkshop() {
         anchorX="center"
         anchorY="middle"
       >
-        {built ? '✓ ĐÃ LÀM XONG • ĐI THEO BIỂN ĐẾN KHU THẮP SÁNG →' : '[E] MỞ QUẦY UP ẢNH'}
+        {built ? '✓ ĐÃ LÀM XONG • ĐANG CẦM TRÊN TAY • NHẤN F BẬT/TẮT ĐÈN' : '[E] MỞ QUẦY UP ẢNH'}
       </Text>
     </group>
   );
