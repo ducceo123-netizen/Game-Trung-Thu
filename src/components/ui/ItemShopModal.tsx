@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { SHOP_PRICES, type ShopItemId, useEconomyStore } from '../../stores/useEconomyStore';
 import { useGameStore } from '../../stores/useGameStore';
 
@@ -17,6 +18,8 @@ export function ItemShopModal() {
   const equip=useEconomyStore((s)=>s.equipItem);
   const name=useGameStore((s)=>s.playerName);
   const show=useGameStore((s)=>s.showAchievement);
+  const [busyItem,setBusyItem]=useState<ShopItemId|null>(null);
+  const [status,setStatus]=useState('');
 
   if(!open) return null;
 
@@ -28,7 +31,10 @@ export function ItemShopModal() {
           <button onClick={close} className="bg-black/20 px-2 py-1">✕</button>
         </div>
         <div className="p-4">
-          <div className="mb-4 text-sm">Ví của bạn: <b className="text-yellow-300">{balance} bánh Trung Thu</b></div>
+          <div className="mb-2 text-sm">Ví của bạn: <b className="text-yellow-300">{balance} bánh Trung Thu</b></div>
+          <div className="mb-4 min-h-5 text-xs text-cyan-300">
+            {status || 'Bấm MUA → mua xong bấm EQUIP để dùng.'}
+          </div>
           <div className="grid sm:grid-cols-3 gap-3">
             {ITEMS.map((item)=>{
               const owned=purchased.includes(item.id);
@@ -37,11 +43,45 @@ export function ItemShopModal() {
                 <div className="font-black text-lg">{item.name}</div>
                 <div className="text-xs text-slate-400 min-h-10 mt-1">{item.desc}</div>
                 <div className="text-yellow-300 font-bold my-3">{SHOP_PRICES[item.id]} bánh</div>
-                {!owned ? <button className="w-full bg-amber-400 text-slate-950 font-black py-2" onClick={async()=>{
-                  const r=await buy(item.id,name);
-                  show({id:'shop_buy',title:r.ok?'MUA THÀNH CÔNG':'CHƯA MUA ĐƯỢC',subtitle:r.ok?`Đã mua ${item.name}`:r.reason==='not_enough'?'Không đủ bánh Trung Thu.':'Vật phẩm đã có hoặc lỗi mạng.'});
-                }}>MUA</button>:
-                <button className={'w-full py-2 font-black '+(isEquipped?'bg-emerald-500 text-slate-950':'bg-cyan-700')} onClick={()=>equip(isEquipped?null:item.id)}>{isEquipped?'ĐANG EQUIP':'EQUIP'}</button>}
+                {!owned ? <button
+                  type="button"
+                  disabled={busyItem!==null}
+                  className="w-full bg-amber-400 text-slate-950 font-black py-2 disabled:opacity-50"
+                  onClick={async()=>{
+                    if (balance < SHOP_PRICES[item.id]) {
+                      setStatus(`Thiếu ${SHOP_PRICES[item.id]-balance} bánh để mua ${item.name}.`);
+                      show({id:'shop_buy',title:'CHƯA ĐỦ BÁNH',subtitle:`Cần ${SHOP_PRICES[item.id]} bánh Trung Thu.`});
+                      return;
+                    }
+
+                    try {
+                      setBusyItem(item.id);
+                      setStatus(`Đang mua ${item.name}...`);
+                      const r=await buy(item.id,name);
+                      const message=r.ok
+                        ? `Đã mua ${item.name}. Bấm EQUIP để dùng.`
+                        : r.reason==='not_enough'
+                          ? 'Không đủ bánh Trung Thu.'
+                          : r.reason==='already_owned'
+                            ? 'Bạn đã sở hữu vật phẩm này.'
+                            : 'Mua chưa thành công, thử lại.';
+                      setStatus(message);
+                      show({id:'shop_buy',title:r.ok?'MUA THÀNH CÔNG':'CHƯA MUA ĐƯỢC',subtitle:message});
+                    } catch {
+                      setStatus('Lỗi kết nối shop. Thử lại sau vài giây.');
+                    } finally {
+                      setBusyItem(null);
+                    }
+                  }}
+                >{busyItem===item.id?'ĐANG MUA...':'MUA'}</button>:
+                <button
+                  type="button"
+                  className={'w-full py-2 font-black '+(isEquipped?'bg-emerald-500 text-slate-950':'bg-cyan-700')}
+                  onClick={()=>{
+                    equip(isEquipped?null:item.id);
+                    setStatus(isEquipped?`Đã bỏ equip ${item.name}.`:`Đã equip ${item.name}.`);
+                  }}
+                >{isEquipped?'BỎ EQUIP':'EQUIP'}</button>}
               </div>;
             })}
           </div>
