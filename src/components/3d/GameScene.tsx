@@ -10,6 +10,7 @@ import { Player } from './Player';
 import { LanternWorkshop } from './LanternWorkshop';
 import { Floor3Halloween } from './Floor3Halloween';
 import { BooGhost } from './BooGhost';
+import { MultiplayerPlayers } from './MultiplayerPlayers';
 import { useGameStore } from '../../stores/useGameStore';
 
 export function GameScene() {
@@ -52,7 +53,8 @@ export function GameScene() {
               </>
             )}
 
-            {/* Player persists while changing floors */}
+            {/* Realtime remote players + local player persist while changing floors */}
+            <MultiplayerPlayers />
             <Player />
           </Physics>
         </Suspense>
