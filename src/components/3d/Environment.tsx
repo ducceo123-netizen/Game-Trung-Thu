@@ -70,7 +70,6 @@ function TrackLight({ position, rotation = [0, 0, 0] }: { position: V3; rotation
         distance={7}
         color="#fff3d6"
         castShadow={false}
-        target-position={[0, -3, 0]}
       />
     </group>
   );
