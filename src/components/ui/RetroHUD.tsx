@@ -51,7 +51,7 @@ export function RetroHUD() {
           {/* Quest Tracker Box */}
           <div className="bg-[#0f172a]/90 backdrop-blur-sm border border-slate-700 p-2.5 rounded shadow-lg max-w-xs text-xs font-mono text-slate-200">
             <div className="flex items-center justify-between text-yellow-400 font-bold mb-1.5">
-              <span>KHÔI PHỤC MẶT TRĂNG:</span>
+              <span>SETUP KHU THẮP SÁNG:</span>
               <span className="text-sm bg-yellow-400/20 px-1.5 py-0.5 rounded text-yellow-300">
                 {collectedIds.length} / 3
               </span>
@@ -78,7 +78,7 @@ export function RetroHUD() {
             {/* Prompt when all 3 collected */}
             {collectedIds.length === 3 && !moonOnline && (
               <div className="mt-2 p-1.5 bg-yellow-500/20 border border-yellow-500/50 rounded text-[11px] text-yellow-300 font-bold animate-pulse text-center">
-                ➔ Quay lại TRẠM PHÁT TRĂNG bấm E!
+                ➔ Đủ đồ rồi — mang về khu setup / stage!
               </div>
             )}
           </div>
@@ -103,9 +103,9 @@ export function RetroHUD() {
                   : 'bg-red-950 border-red-500 text-red-300'
               }`}
             >
-              <span>TRĂNG:</span>
+              <span>LẦU 4:</span>
               <span className="font-extrabold">
-                {moonOnline ? 'ONLINE 🌕' : 'OFFLINE ⚡ (404)'}
+                {moonOnline ? 'LÊN ĐÈN ✨' : 'ĐANG SETUP 🛠️'}
               </span>
             </div>
           </div>
@@ -117,12 +117,12 @@ export function RetroHUD() {
               className="bg-emerald-900/90 hover:bg-emerald-800 border border-emerald-500 text-emerald-200 px-2.5 py-1 text-xs font-mono rounded shadow cursor-pointer active:scale-95 transition-transform flex items-center gap-1.5"
             >
               <span>🎋</span>
-              <span>CÂY TRE HUYỀN THOẠI: </span>
+              <span>CÂY TRE BTC: </span>
               <span className="text-yellow-300 underline font-bold">[CHỌC LỒNG ĐÈN]</span>
             </button>
           ) : (
             <div className="bg-slate-900/80 border border-slate-700 text-slate-400 px-2.5 py-1 text-[11px] font-mono rounded">
-              🎋 Chưa có cây tre (Gặp Chú Bảo Vệ)
+              🎋 Chưa có cây tre (Gặp Chú Bảo Vệ/BTC)
             </div>
           )}
 
