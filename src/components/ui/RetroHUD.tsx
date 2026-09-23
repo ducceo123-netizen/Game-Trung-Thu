@@ -18,6 +18,9 @@ export function RetroHUD() {
   const sodiumLevel = useGameStore((s) => s.sodiumLevel);
   const onlineConnected = useGameStore((s) => s.onlineConnected);
   const onlinePlayerCount = useGameStore((s) => s.onlinePlayerCount);
+  const health = useGameStore((s) => s.health);
+  const maxHealth = useGameStore((s) => s.maxHealth);
+  const isDead = useGameStore((s) => s.isDead);
 
   const [isMuted, setIsMuted] = useState(sounds.getMuted());
 
@@ -81,6 +84,25 @@ export function RetroHUD() {
                 <div className="text-amber-300 mt-0.5">Nhấn F để bật / tắt</div>
               </div>
             )}
+          </div>
+
+          <div className="w-[280px] bg-slate-950/90 border border-red-700 px-2.5 py-2 rounded font-mono">
+            <div className="flex items-center justify-between text-[11px] mb-1">
+              <span className="font-black text-red-300">❤️ HP</span>
+              <span className={isDead ? 'text-red-400 font-black' : 'text-slate-200'}>{health}/{maxHealth}</span>
+            </div>
+            <div className="h-2.5 bg-red-950 border border-red-900 overflow-hidden">
+              <div
+                className="h-full transition-[width] duration-150"
+                style={{
+                  width: `${Math.max(0, Math.min(100, (health / maxHealth) * 100))}%`,
+                  backgroundColor: health > 50 ? '#22c55e' : health > 25 ? '#f59e0b' : '#ef4444',
+                }}
+              />
+            </div>
+            <div className="text-[10px] text-slate-400 mt-1 text-right">
+              {personalLanternBuilt ? 'Click trái / J: quật lồng đèn • 25 damage' : 'Làm lồng đèn để mở khóa combat'}
+            </div>
           </div>
 
           {(booWarning || booActive) && (
