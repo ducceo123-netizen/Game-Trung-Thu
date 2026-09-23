@@ -5,8 +5,10 @@ export function LanternWorkshopModal() {
   const open = useGameStore((s) => s.workshopOpen);
   const image = useGameStore((s) => s.personalLanternImage);
   const built = useGameStore((s) => s.personalLanternBuilt);
+  const lanternText = useGameStore((s) => s.personalLanternText);
   const closeWorkshop = useGameStore((s) => s.closeWorkshop);
   const setImage = useGameStore((s) => s.setPersonalLanternImage);
+  const setLanternText = useGameStore((s) => s.setPersonalLanternText);
   const setShapeMode = useGameStore((s) => s.setPersonalLanternShapeMode);
   const build = useGameStore((s) => s.buildPersonalLantern);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -63,12 +65,12 @@ export function LanternWorkshopModal() {
         <div className="p-4 space-y-4">
           <div className="bg-yellow-100 border-2 border-amber-700 p-3 text-sm leading-relaxed">
             <div className="font-black mb-1">BẢNG HƯỚNG DẪN:</div>
-            <div>1. Chọn một tấm ảnh bất kỳ trên máy.</div>
+            <div>1. Chọn ảnh/meme hoặc gõ một câu ngắn để giao tiếp trên lồng đèn.</div>
             <div>2. Hệ thống đọc tỷ lệ ảnh để chọn shape dọc / ngang / vuông gần giống ảnh.</div>
             <div>3. Bấm <b>LÀM LỒNG ĐÈN</b> — nhân vật sẽ cầm đèn theo luôn.</div>
             <div>4. Nhấn <b>F</b> để bật / tắt đèn trong lúc đi vòng vòng.</div>
             <div>5. Có thể mang đèn lên Lầu 3... nếu đủ gan.</div>
-            <div className="mt-1 text-[11px] text-amber-900">Mẹo: ảnh chân dung, ảnh team hay meme nội bộ đều chơi được.</div>
+            <div className="mt-1 text-[11px] text-amber-900">Mẹo: đổi meme/ảnh/text bất kỳ lúc nào để dùng lồng đèn như bảng chat di động.</div>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
@@ -100,6 +102,18 @@ export function LanternWorkshopModal() {
             </div>
           </div>
 
+          <div className="bg-white border-2 border-slate-700 p-3">
+            <div className="font-black text-sm mb-1">💬 CHỮ TRÊN LỒNG ĐÈN</div>
+            <input
+              value={lanternText}
+              onChange={(e)=>setLanternText(e.target.value)}
+              maxLength={42}
+              placeholder="VD: ai đánh tui là hết bánh nha :))"
+              className="w-full bg-slate-100 border border-slate-500 px-3 py-2 text-sm outline-none focus:border-amber-500"
+            />
+            <div className="text-[10px] text-slate-500 mt-1">{lanternText.length}/42 • người chơi khác online cũng thấy dòng này.</div>
+          </div>
+
           <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
 
           <div className="flex gap-2 justify-end">
@@ -110,7 +124,7 @@ export function LanternWorkshopModal() {
               ĐÓNG
             </button>
             <button
-              disabled={!image}
+              disabled={!image && !lanternText.trim()}
               onClick={() => {
                 build();
                 closeWorkshop();
