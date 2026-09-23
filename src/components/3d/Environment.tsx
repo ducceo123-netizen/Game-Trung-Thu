@@ -1,224 +1,411 @@
-import { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { RigidBody } from '@react-three/rapier';
+import { useMemo } from 'react';
 import { Text } from '@react-three/drei';
-import * as THREE from 'three';
+import { RigidBody } from '@react-three/rapier';
 
-// Low-poly Vietnamese Plastic Stool ("Ghế nhựa Duy Tân")
-export function PlasticStool({ position, rotation = [0, 0, 0], color = '#d32f2f' }: {
-  position: [number, number, number];
-  rotation?: [number, number, number];
-  color?: string;
-}) {
-  return (
-    <group position={position} rotation={rotation}>
-      {/* Seat with small center hole */}
-      <mesh position={[0, 0.42, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.42, 0.05, 0.42]} />
-        <meshStandardMaterial color={color} roughness={0.4} />
-      </mesh>
-      {/* 4 Sturdy angled legs */}
-      {[
-        [-0.16, 0.2, -0.16],
-        [0.16, 0.2, -0.16],
-        [-0.16, 0.2, 0.16],
-        [0.16, 0.2, 0.16],
-      ].map(([x, y, z], i) => (
-        <mesh key={i} position={[x, y, z]} castShadow>
-          <boxGeometry args={[0.045, 0.4, 0.045]} />
-          <meshStandardMaterial color={color} roughness={0.4} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
+type V3 = [number, number, number];
 
-// Folding Office / Street Vendor Table (Bàn inox / bàn gấp)
-export function FoldingTable({ position, rotation = [0, 0, 0] }: {
-  position: [number, number, number];
-  rotation?: [number, number, number];
-}) {
-  return (
-    <group position={position} rotation={rotation}>
-      {/* Table top */}
-      <mesh position={[0, 0.72, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1.5, 0.05, 0.8]} />
-        <meshStandardMaterial color="#94a3b8" metalness={0.7} roughness={0.25} />
-      </mesh>
-      {/* Table legs (crossed steel bars) */}
-      <mesh position={[-0.6, 0.35, 0]} castShadow>
-        <cylinderGeometry args={[0.02, 0.02, 0.72, 8]} />
-        <meshStandardMaterial color="#475569" metalness={0.8} roughness={0.3} />
-      </mesh>
-      <mesh position={[0.6, 0.35, 0]} castShadow>
-        <cylinderGeometry args={[0.02, 0.02, 0.72, 8]} />
-        <meshStandardMaterial color="#475569" metalness={0.8} roughness={0.3} />
-      </mesh>
-    </group>
-  );
-}
+const WOOD = '#c79b69';
+const WOOD_DARK = '#8b5e34';
+const WALL = '#f2efe7';
+const FLOOR = '#e7e2d7';
+const CONCRETE = '#aaa59b';
+const BLACK = '#171717';
+const GLASS = '#6b8790';
+const TEAL = '#19a6ad';
+const ORANGE = '#e76f3c';
+const PLANTER = '#f3f2ec';
+const GREEN = ['#2f7d42', '#4f944d', '#6aa84f', '#2e6b3d'];
 
-// Cardboard Box with duct tape
-export function CardboardBox({ position, rotation = [0, 0, 0], scale = [1, 1, 1], label = 'FINAL_v7' }: {
-  position: [number, number, number];
-  rotation?: [number, number, number];
-  scale?: [number, number, number];
-  label?: string;
-}) {
-  return (
-    <group position={position} rotation={rotation} scale={scale}>
-      <mesh position={[0, 0.3, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.7, 0.6, 0.7]} />
-        <meshStandardMaterial color="#b4834b" roughness={0.9} />
-      </mesh>
-      {/* Brown/silver duct tape cross */}
-      <mesh position={[0, 0.605, 0]}>
-        <boxGeometry args={[0.71, 0.01, 0.12]} />
-        <meshStandardMaterial color="#88623b" roughness={0.5} />
-      </mesh>
-      <mesh position={[0, 0.606, 0]}>
-        <boxGeometry args={[0.12, 0.01, 0.71]} />
-        <meshStandardMaterial color="#cbd5e1" metalness={0.5} roughness={0.4} />
-      </mesh>
-      {/* Handwritten text sticker */}
-      {label && (
-        <group position={[0, 0.35, 0.355]}>
-          <mesh>
-            <planeGeometry args={[0.38, 0.18]} />
-            <meshBasicMaterial color="#ffffff" />
-          </mesh>
-          <Text
-            position={[0, 0, 0.01]}
-            fontSize={0.065}
-            color="#0f172a"
-            anchorX="center"
-            anchorY="middle"
-          >
-            {label}
-          </Text>
-        </group>
-      )}
-    </group>
-  );
-}
-
-// Hanging Office Sign
-export function OfficeSign({ text, position, rotation = [0, 0, 0], bgColor = '#dc2626', textColor = '#fef08a' }: {
+function RoundedSign({
+  text,
+  position,
+  rotation = [0, 0, 0],
+  width = 2.6,
+  bg = '#13395b',
+  fg = '#f8fafc',
+  fontSize = 0.14,
+}: {
   text: string;
-  position: [number, number, number];
-  rotation?: [number, number, number];
-  bgColor?: string;
-  textColor?: string;
+  position: V3;
+  rotation?: V3;
+  width?: number;
+  bg?: string;
+  fg?: string;
+  fontSize?: number;
 }) {
   return (
     <group position={position} rotation={rotation}>
-      {/* Sign board */}
       <mesh castShadow>
-        <boxGeometry args={[2.2, 0.5, 0.06]} />
-        <meshStandardMaterial color={bgColor} roughness={0.6} />
-      </mesh>
-      {/* Yellow border */}
-      <mesh position={[0, 0, 0.035]}>
-        <boxGeometry args={[2.1, 0.42, 0.01]} />
-        <meshStandardMaterial color={textColor} roughness={0.3} emissive={textColor} emissiveIntensity={0.2} />
-      </mesh>
-      {/* Inner panel */}
-      <mesh position={[0, 0, 0.042]}>
-        <boxGeometry args={[2.02, 0.36, 0.01]} />
-        <meshStandardMaterial color={bgColor} />
+        <boxGeometry args={[width, 0.62, 0.07]} />
+        <meshStandardMaterial color={bg} roughness={0.72} />
       </mesh>
       <Text
-        position={[0, 0, 0.05]}
-        fontSize={0.13}
-        color={textColor}
+        position={[0, 0, 0.045]}
+        fontSize={fontSize}
+        color={fg}
         anchorX="center"
         anchorY="middle"
-        maxWidth={1.9}
+        maxWidth={width - 0.25}
         textAlign="center"
+        fontWeight="bold"
       >
         {text}
       </Text>
-      {/* Suspension wire */}
-      <mesh position={[-0.8, 0.45, 0]}>
-        <cylinderGeometry args={[0.006, 0.006, 0.5, 4]} />
-        <meshBasicMaterial color="#475569" />
+    </group>
+  );
+}
+
+function TrackLight({ position, rotation = [0, 0, 0] }: { position: V3; rotation?: V3 }) {
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh>
+        <cylinderGeometry args={[0.09, 0.11, 0.28, 10]} />
+        <meshStandardMaterial color={BLACK} roughness={0.35} />
       </mesh>
-      <mesh position={[0.8, 0.45, 0]}>
-        <cylinderGeometry args={[0.006, 0.006, 0.5, 4]} />
-        <meshBasicMaterial color="#475569" />
+      <spotLight
+        position={[0, -0.18, 0]}
+        angle={0.5}
+        penumbra={0.85}
+        intensity={0.55}
+        distance={7}
+        color="#fff3d6"
+        castShadow={false}
+        target-position={[0, -3, 0]}
+      />
+    </group>
+  );
+}
+
+function CeilingTrack({ z, x = 0, length = 7 }: { z: number; x?: number; length?: number }) {
+  return (
+    <group>
+      <mesh position={[x, 5.02, z]}>
+        <boxGeometry args={[length, 0.045, 0.045]} />
+        <meshStandardMaterial color={BLACK} roughness={0.38} />
+      </mesh>
+      {[-0.38, 0, 0.38].map((t, i) => (
+        <TrackLight key={i} position={[x + t * length, 4.86, z]} rotation={[0, 0, i === 1 ? 0 : (i - 1) * 0.16]} />
+      ))}
+    </group>
+  );
+}
+
+function HangingWoodLight({ position, length = 4.6 }: { position: V3; length?: number }) {
+  return (
+    <group position={position}>
+      <mesh position={[-length / 2 + 0.35, 0.6, 0]}>
+        <cylinderGeometry args={[0.008, 0.008, 1.2, 5]} />
+        <meshBasicMaterial color="#7a756c" />
+      </mesh>
+      <mesh position={[length / 2 - 0.35, 0.6, 0]}>
+        <cylinderGeometry args={[0.008, 0.008, 1.2, 5]} />
+        <meshBasicMaterial color="#7a756c" />
+      </mesh>
+      <mesh castShadow>
+        <boxGeometry args={[length, 0.18, 0.26]} />
+        <meshStandardMaterial color={WOOD} roughness={0.72} />
+      </mesh>
+      <mesh position={[0, -0.105, 0]}>
+        <boxGeometry args={[length - 0.18, 0.025, 0.12]} />
+        <meshStandardMaterial color="#fff5d7" emissive="#ffe3a1" emissiveIntensity={1.05} />
+      </mesh>
+      <pointLight position={[0, -0.28, 0]} intensity={0.4} distance={6} color="#ffe8bd" />
+    </group>
+  );
+}
+
+function OfficeChair({ position, rotation = [0, 0, 0], dark = false }: { position: V3; rotation?: V3; dark?: boolean }) {
+  const c = dark ? '#30343a' : '#ecebe4';
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh position={[0, 0.46, 0]} castShadow>
+        <boxGeometry args={[0.48, 0.08, 0.48]} />
+        <meshStandardMaterial color={c} roughness={0.6} />
+      </mesh>
+      <mesh position={[0, 0.85, 0.19]} rotation={[-0.08, 0, 0]} castShadow>
+        <boxGeometry args={[0.5, 0.62, 0.08]} />
+        <meshStandardMaterial color={c} roughness={0.6} />
+      </mesh>
+      <mesh position={[0, 0.2, 0]}>
+        <cylinderGeometry args={[0.035, 0.035, 0.45, 8]} />
+        <meshStandardMaterial color="#767676" metalness={0.65} roughness={0.35} />
+      </mesh>
+      <mesh position={[0, 0.04, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.24, 0.24, 0.035, 5]} />
+        <meshStandardMaterial color="#555b61" metalness={0.5} roughness={0.4} />
       </mesh>
     </group>
   );
 }
 
-// Fairy lights cable with blinking colored LEDs
-export function FairyLightsString({ start, end, lightCount = 10 }: {
-  start: [number, number, number];
-  end: [number, number, number];
-  lightCount?: number;
-}) {
-  const lightsRef = useRef<THREE.Group>(null);
-  const colors = useMemo(() => ['#ff0055', '#ffaa00', '#00ffcc', '#ff00aa', '#ffff00', '#00e5ff'], []);
-
-  const points = useMemo(() => {
-    const pts = [];
-    for (let i = 0; i <= lightCount; i++) {
-      const t = i / lightCount;
-      const x = start[0] + (end[0] - start[0]) * t;
-      const z = start[2] + (end[2] - start[2]) * t;
-      // Catany / sag curve
-      const sag = Math.sin(t * Math.PI) * 0.45;
-      const y = start[1] + (end[1] - start[1]) * t - sag;
-      pts.push({ x, y, z, color: colors[i % colors.length] });
-    }
-    return pts;
-  }, [start, end, lightCount, colors]);
-
-  useFrame((state) => {
-    if (!lightsRef.current) return;
-    const time = state.clock.getElapsedTime();
-    lightsRef.current.children.forEach((child, i) => {
-      const mesh = child as THREE.Mesh;
-      if (mesh.material && 'emissiveIntensity' in mesh.material) {
-        const mat = mesh.material as THREE.MeshStandardMaterial;
-        mat.emissiveIntensity = 0.4 + Math.sin(time * 6 + i * 1.3) * 0.8;
-      }
-    });
-  });
-
+function SimpleChair({ position, rotation = [0, 0, 0] }: { position: V3; rotation?: V3 }) {
   return (
-    <group ref={lightsRef}>
-      {points.map((pt, i) => (
-        <mesh key={i} position={[pt.x, pt.y, pt.z]}>
-          <sphereGeometry args={[0.065, 8, 8]} />
-          <meshStandardMaterial
-            color={pt.color}
-            emissive={pt.color}
-            emissiveIntensity={1.0}
-            roughness={0.2}
-          />
+    <group position={position} rotation={rotation}>
+      <mesh position={[0, 0.45, 0]} castShadow>
+        <boxGeometry args={[0.52, 0.06, 0.5]} />
+        <meshStandardMaterial color="#f2f1ea" roughness={0.72} />
+      </mesh>
+      <mesh position={[0, 0.88, 0.2]} castShadow>
+        <boxGeometry args={[0.52, 0.65, 0.06]} />
+        <meshStandardMaterial color="#f2f1ea" roughness={0.72} />
+      </mesh>
+      {[[-0.19, 0.2, -0.18], [0.19, 0.2, -0.18], [-0.19, 0.2, 0.18], [0.19, 0.2, 0.18]].map(([x,y,z], i) => (
+        <mesh key={i} position={[x, y, z]}>
+          <cylinderGeometry args={[0.018, 0.018, 0.42, 6]} />
+          <meshStandardMaterial color="#9a9a95" metalness={0.55} roughness={0.35} />
         </mesh>
       ))}
     </group>
   );
 }
 
-// Mini traditional red star lantern on strings
-export function MiniStarLantern({ position }: { position: [number, number, number] }) {
+function Planter({ position, length = 3.2, depth = 0.72, height = 0.68 }: { position: V3; length?: number; depth?: number; height?: number }) {
+  const leaves = useMemo(() => {
+    return Array.from({ length: Math.max(8, Math.round(length * 4)) }, (_, i) => {
+      const t = i / Math.max(1, Math.round(length * 4) - 1);
+      const x = -length / 2 + 0.2 + t * (length - 0.4);
+      const z = ((i % 3) - 1) * depth * 0.19;
+      const y = height + 0.22 + (i % 4) * 0.06;
+      return { x, y, z, color: GREEN[i % GREEN.length], scale: 0.16 + (i % 3) * 0.03 };
+    });
+  }, [length, depth, height]);
+
   return (
     <group position={position}>
-      {/* Star center */}
-      <mesh>
-        <cylinderGeometry args={[0.22, 0.22, 0.08, 5]} />
-        <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={0.6} roughness={0.3} />
+      <mesh position={[0, height / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[length, height, depth]} />
+        <meshStandardMaterial color={PLANTER} roughness={0.88} />
       </mesh>
-      {/* Bamboo ring rim */}
-      <mesh>
-        <torusGeometry args={[0.25, 0.015, 8, 16]} />
-        <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={0.3} />
+      {leaves.map((p, i) => (
+        <group key={i} position={[p.x, p.y, p.z]} rotation={[0, (i * 1.7) % Math.PI, (i % 2 ? 1 : -1) * 0.22]}>
+          <mesh scale={[1, 1.6, 0.55]}>
+            <sphereGeometry args={[p.scale, 8, 6]} />
+            <meshStandardMaterial color={p.color} roughness={0.9} />
+          </mesh>
+          {i % 4 === 0 && (
+            <mesh position={[0, 0.18, 0]} rotation={[0, 0, 0.65]}>
+              <capsuleGeometry args={[0.035, 0.38, 4, 6]} />
+              <meshStandardMaterial color={GREEN[(i + 1) % GREEN.length]} roughness={0.95} />
+            </mesh>
+          )}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function DeskRow({ position, length = 5.4, rotation = [0, 0, 0] }: { position: V3; length?: number; rotation?: V3 }) {
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh position={[0, 0.74, 0]} castShadow receiveShadow>
+        <boxGeometry args={[length, 0.08, 1.15]} />
+        <meshStandardMaterial color="#d7b58a" roughness={0.8} />
       </mesh>
-      {/* Mini point light */}
-      <pointLight color="#ff4444" intensity={0.4} distance={3} decay={2} />
+      {[-length / 2 + 0.28, length / 2 - 0.28].map((x) => (
+        <mesh key={x} position={[x, 0.36, 0]} castShadow>
+          <boxGeometry args={[0.08, 0.72, 1.02]} />
+          <meshStandardMaterial color="#ecebe5" roughness={0.65} />
+        </mesh>
+      ))}
+      <Planter position={[0, 0.77, 0]} length={Math.min(3.5, length - 1)} depth={0.42} height={0.48} />
+      {[-1.7, 0, 1.7].filter((x) => Math.abs(x) < length / 2 - 0.35).map((x, i) => (
+        <OfficeChair key={x} position={[x, 0, 1.0]} rotation={[0, Math.PI, 0]} dark={i % 2 === 0} />
+      ))}
+    </group>
+  );
+}
+
+function TVStand({ position, rotation = [0, 0, 0], label = 'UID' }: { position: V3; rotation?: V3; label?: string }) {
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh position={[0, 1.65, 0]} castShadow>
+        <boxGeometry args={[2.6, 1.48, 0.12]} />
+        <meshStandardMaterial color="#151719" roughness={0.38} />
+      </mesh>
+      <mesh position={[0, 1.65, 0.071]}>
+        <planeGeometry args={[2.36, 1.25]} />
+        <meshStandardMaterial color="#eef7fb" emissive="#d7efff" emissiveIntensity={0.25} />
+      </mesh>
+      <Text position={[0, 1.76, 0.085]} fontSize={0.34} color="#164d72" anchorX="center" anchorY="middle" fontWeight="bold">
+        {label}
+      </Text>
+      <Text position={[0, 1.38, 0.085]} fontSize={0.12} color="#e3703f" anchorX="center" anchorY="middle">
+        MID-AUTUMN WORKSHOP
+      </Text>
+      <mesh position={[0, 0.73, 0]}>
+        <boxGeometry args={[0.12, 1.05, 0.12]} />
+        <meshStandardMaterial color="#262626" metalness={0.62} roughness={0.4} />
+      </mesh>
+      <mesh position={[0, 0.18, 0]}>
+        <boxGeometry args={[1.1, 0.08, 0.72]} />
+        <meshStandardMaterial color="#303030" metalness={0.55} roughness={0.42} />
+      </mesh>
+    </group>
+  );
+}
+
+function Whiteboard({ position, rotation = [0, 0, 0] }: { position: V3; rotation?: V3 }) {
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh position={[0, 1.55, 0]} castShadow>
+        <boxGeometry args={[1.8, 2.25, 0.09]} />
+        <meshStandardMaterial color="#d4d2ca" metalness={0.45} roughness={0.35} />
+      </mesh>
+      <mesh position={[0, 1.55, 0.055]}>
+        <planeGeometry args={[1.64, 2.02]} />
+        <meshStandardMaterial color="#f5f5ef" roughness={0.25} />
+      </mesh>
+      {[-0.7, 0.7].map((x) => (
+        <mesh key={x} position={[x, 0.42, 0]}>
+          <cylinderGeometry args={[0.018, 0.018, 0.8, 6]} />
+          <meshStandardMaterial color="#9a9a95" metalness={0.6} roughness={0.3} />
+        </mesh>
+      ))}
+      <mesh position={[0, 0.08, 0]}>
+        <boxGeometry args={[1.45, 0.06, 0.5]} />
+        <meshStandardMaterial color="#9a9a95" metalness={0.55} roughness={0.38} />
+      </mesh>
+    </group>
+  );
+}
+
+function ReceptionArea() {
+  return (
+    <group position={[0, 0, 11.4]}>
+      <mesh position={[-2.7, 0.62, 0]} castShadow receiveShadow>
+        <boxGeometry args={[4.2, 1.24, 1.15]} />
+        <meshStandardMaterial color={WOOD} roughness={0.76} />
+      </mesh>
+      <mesh position={[-2.7, 1.27, 0]} castShadow>
+        <boxGeometry args={[4.35, 0.16, 1.28]} />
+        <meshStandardMaterial color="#f4f2eb" roughness={0.45} />
+      </mesh>
+      <mesh position={[-0.7, 1.42, -0.12]} castShadow>
+        <boxGeometry args={[0.6, 2.85, 1.0]} />
+        <meshStandardMaterial color={ORANGE} roughness={0.55} />
+      </mesh>
+      <Planter position={[3.2, 0, -0.15]} length={3.7} depth={1.15} height={1.15} />
+      <RoundedSign text="UID • LẦU 4 • VĂN PHÒNG GÒ DẦU" position={[0.3, 3.3, -0.95]} width={5.4} bg="#f3f0e8" fg="#154b70" fontSize={0.2} />
+      <RoundedSign text="HỘI THI LỒNG ĐÈN THỦ CÔNG" position={[0.3, 2.55, -0.96]} width={4.6} bg="#d86638" fg="#fff9df" fontSize={0.16} />
+    </group>
+  );
+}
+
+function WorkspaceArea() {
+  return (
+    <group>
+      <DeskRow position={[0, 0, 5.8]} />
+      <DeskRow position={[0.8, 0, 1.8]} />
+      <DeskRow position={[-0.9, 0, -2.3]} />
+      <HangingWoodLight position={[0, 4.25, 5.8]} />
+      <HangingWoodLight position={[0.8, 4.25, 1.8]} />
+      <HangingWoodLight position={[-0.9, 4.25, -2.3]} />
+      <RoundedSign text="→ QUẦY LÀM LỒNG ĐÈN" position={[-7.65, 2.5, 3.2]} rotation={[0, Math.PI / 2, 0]} width={2.8} bg="#fff6cf" fg="#7b3d1d" />
+      <RoundedSign text="UP ẢNH → LÀM ĐÈN →" position={[7.65, 2.45, -1.0]} rotation={[0, -Math.PI / 2, 0]} width={2.9} bg="#e9f4f2" fg="#10616b" />
+    </group>
+  );
+}
+
+function WorkshopArea() {
+  return (
+    <group position={[-5.4, 0, -9.4]}>
+      <mesh position={[0, 2.25, 1.85]} castShadow>
+        <boxGeometry args={[7.0, 4.5, 0.16]} />
+        <meshStandardMaterial color={WALL} roughness={0.92} />
+      </mesh>
+      <TVStand position={[-1.35, 0, 1.3]} label="UID WORKSHOP" />
+      <Whiteboard position={[1.7, 0, 1.28]} />
+      <RoundedSign text="QUẦY LÀM LỒNG ĐÈN • BẤM E" position={[0.2, 3.55, 1.6]} width={4.9} bg="#1d596f" fg="#f7f1d5" fontSize={0.17} />
+      {[-2.3, -1.4, -0.5, 0.4, 1.3, 2.2].map((x, i) => (
+        <SimpleChair key={x} position={[x, 0, -0.5 - (i % 2) * 0.72]} rotation={[0, Math.PI, 0]} />
+      ))}
+    </group>
+  );
+}
+
+function TieredSeating() {
+  return (
+    <group position={[5.5, 0, -14.2]}>
+      {[0, 1, 2].map((i) => (
+        <mesh key={i} position={[0, 0.2 + i * 0.24, 1.4 + i * 0.72]} castShadow receiveShadow>
+          <boxGeometry args={[6.6, 0.4, 1.35]} />
+          <meshStandardMaterial color={WOOD} roughness={0.78} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function EventArea() {
+  return (
+    <group>
+      <TieredSeating />
+      <TVStand position={[5.5, 0, -17.9]} label="UID" />
+      <RoundedSign text="KHU THẮP SÁNG LỒNG ĐÈN" position={[5.5, 3.65, -18.25]} width={4.5} bg="#b53b2e" fg="#fff3c4" fontSize={0.17} />
+      <RoundedSign text="MANG ĐÈN TỚI ĐÂY • BẤM E" position={[5.5, 2.95, -18.25]} width={4.0} bg="#fff1c9" fg="#7f271d" fontSize={0.14} />
+      {[-2.2, -1.1, 0, 1.1, 2.2].map((x, i) => (
+        <SimpleChair key={x} position={[5.5 + x, 0, -11.1 - (i % 2) * 0.18]} rotation={[0, Math.PI, 0]} />
+      ))}
+    </group>
+  );
+}
+
+function BoothArea() {
+  return (
+    <group position={[6.55, 0, 5.8]}>
+      <mesh position={[0, 1.65, 0]} castShadow>
+        <boxGeometry args={[3.2, 3.3, 2.5]} />
+        <meshStandardMaterial color={TEAL} roughness={0.62} />
+      </mesh>
+      <mesh position={[0, 1.65, -1.27]}>
+        <boxGeometry args={[2.55, 2.65, 0.08]} />
+        <meshStandardMaterial color="#d9c5a9" roughness={0.92} />
+      </mesh>
+      <mesh position={[-1.28, 1.55, 0]}>
+        <boxGeometry args={[0.16, 2.4, 2.0]} />
+        <meshStandardMaterial color={WOOD} roughness={0.78} />
+      </mesh>
+      <mesh position={[1.28, 1.55, 0]}>
+        <boxGeometry args={[0.16, 2.4, 2.0]} />
+        <meshStandardMaterial color={WOOD} roughness={0.78} />
+      </mesh>
+      <mesh position={[0, 0.52, 0]}>
+        <boxGeometry args={[0.82, 0.05, 0.72]} />
+        <meshStandardMaterial color={WOOD} roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 0.23, 0]}>
+        <boxGeometry args={[0.08, 0.56, 0.08]} />
+        <meshStandardMaterial color="#242424" roughness={0.45} />
+      </mesh>
+      <RoundedSign text="THỎ ĐANG HỌP • ĐỪNG GÕ CỬA" position={[0, 3.55, 0]} width={3.3} bg="#11727a" fg="#f7f2dd" fontSize={0.12} />
+    </group>
+  );
+}
+
+function GlassWall({ position, width = 8, height = 4.2, rotation = [0,0,0] }: { position: V3; width?: number; height?: number; rotation?: V3 }) {
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh>
+        <boxGeometry args={[width, height, 0.04]} />
+        <meshPhysicalMaterial color={GLASS} transparent opacity={0.17} roughness={0.08} transmission={0.45} />
+      </mesh>
+      {Array.from({ length: Math.floor(width / 1.55) + 1 }).map((_, i, arr) => {
+        const x = -width / 2 + (i / (arr.length - 1)) * width;
+        return (
+          <mesh key={i} position={[x, 0, 0.025]}>
+            <boxGeometry args={[0.055, height, 0.055]} />
+            <meshStandardMaterial color={BLACK} roughness={0.35} />
+          </mesh>
+        );
+      })}
+      <mesh position={[0, height / 2, 0.025]}>
+        <boxGeometry args={[width, 0.055, 0.055]} />
+        <meshStandardMaterial color={BLACK} />
+      </mesh>
+      <mesh position={[0, -height / 2, 0.025]}>
+        <boxGeometry args={[width, 0.055, 0.055]} />
+        <meshStandardMaterial color={BLACK} />
+      </mesh>
     </group>
   );
 }
@@ -226,303 +413,101 @@ export function MiniStarLantern({ position }: { position: [number, number, numbe
 export function Environment() {
   return (
     <group>
-      {/* --- GROUND (Alley & Courtyard) --- */}
       <RigidBody type="fixed" colliders="cuboid" friction={1}>
-        <mesh position={[0, -0.1, -4]} receiveShadow>
-          <boxGeometry args={[24, 0.2, 48]} />
-          <meshStandardMaterial color="#1a202c" roughness={0.85} metalness={0.15} />
+        <mesh position={[0, -0.12, -3.8]} receiveShadow>
+          <boxGeometry args={[20, 0.24, 40]} />
+          <meshStandardMaterial color={FLOOR} roughness={0.62} metalness={0.05} />
         </mesh>
       </RigidBody>
 
-      {/* Decorative pavement tiles & wet puddles */}
-      <mesh position={[0, 0.01, 8]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[10, 16]} />
-        <meshStandardMaterial color="#1e293b" roughness={0.7} />
-      </mesh>
-      {/* Central courtyard stone circle */}
-      <mesh position={[0, 0.012, -15]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <circleGeometry args={[7.5, 32]} />
-        <meshStandardMaterial color="#242f44" roughness={0.6} />
-      </mesh>
-      {/* Yellow Caution / Safety painted lines */}
-      <mesh position={[-3.8, 0.015, 6]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.15, 18]} />
-        <meshBasicMaterial color="#eab308" />
-      </mesh>
-      <mesh position={[3.8, 0.015, 6]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.15, 18]} />
-        <meshBasicMaterial color="#eab308" />
-      </mesh>
-
-      {/* --- ALLEY WALLS & BUILDINGS (Low Poly Vietnamese Corporate Office) --- */}
-      {/* Left Wall Corridor */}
-      <RigidBody type="fixed" colliders="cuboid">
-        <mesh position={[-5.8, 4, 6]} castShadow receiveShadow>
-          <boxGeometry args={[1.5, 8, 22]} />
-          <meshStandardMaterial color="#2d3748" roughness={0.9} />
+      {/* subtle tile seams */}
+      {[-8,-4,0,4,8].map((x) => (
+        <mesh key={'x'+x} position={[x, 0.008, -4]} rotation={[-Math.PI/2,0,0]}>
+          <planeGeometry args={[0.018, 39]} />
+          <meshBasicMaterial color="#d5d0c7" />
         </mesh>
-        {/* Left Courtyard Wall */}
-        <mesh position={[-8.5, 4, -15]} castShadow receiveShadow>
-          <boxGeometry args={[1.5, 8, 20]} />
-          <meshStandardMaterial color="#232b38" roughness={0.9} />
+      ))}
+      {[12,8,4,0,-4,-8,-12,-16,-20].map((z) => (
+        <mesh key={'z'+z} position={[0, 0.009, z]} rotation={[-Math.PI/2,0,0]}>
+          <planeGeometry args={[19.5, 0.018]} />
+          <meshBasicMaterial color="#d5d0c7" />
         </mesh>
-      </RigidBody>
-
-      {/* Right Wall Corridor */}
-      <RigidBody type="fixed" colliders="cuboid">
-        <mesh position={[5.8, 4, 6]} castShadow receiveShadow>
-          <boxGeometry args={[1.5, 8, 22]} />
-          <meshStandardMaterial color="#2d3748" roughness={0.9} />
-        </mesh>
-        {/* Right Courtyard Wall */}
-        <mesh position={[8.5, 4, -15]} castShadow receiveShadow>
-          <boxGeometry args={[1.5, 8, 20]} />
-          <meshStandardMaterial color="#232b38" roughness={0.9} />
-        </mesh>
-      </RigidBody>
-
-      {/* Back Wall Courtyard */}
-      <RigidBody type="fixed" colliders="cuboid">
-        <mesh position={[0, 4, -25.5]} castShadow receiveShadow>
-          <boxGeometry args={[20, 8, 1.5]} />
-          <meshStandardMaterial color="#1a202c" roughness={0.9} />
-        </mesh>
-      </RigidBody>
-
-      {/* Entrance Fence / Barrier (Prevents player from walking off the map) */}
-      <RigidBody type="fixed" colliders="cuboid">
-        <mesh position={[0, 1.5, 16.5]}>
-          <boxGeometry args={[14, 3, 0.5]} />
-          <meshStandardMaterial color="#334155" transparent opacity={0.1} />
-        </mesh>
-      </RigidBody>
-
-      {/* Corrugated Tin Roofs Overhangs (Mái tôn xanh) */}
-      <mesh position={[-4.5, 4.8, 6]} rotation={[0, 0, -0.3]}>
-        <boxGeometry args={[2, 0.08, 18]} />
-        <meshStandardMaterial color="#0284c7" metalness={0.7} roughness={0.3} />
-      </mesh>
-      <mesh position={[4.5, 4.8, 6]} rotation={[0, 0, 0.3]}>
-        <boxGeometry args={[2, 0.08, 18]} />
-        <meshStandardMaterial color="#0284c7" metalness={0.7} roughness={0.3} />
-      </mesh>
-
-      {/* Air conditioning condenser units (Cục nóng điều hòa kêu è è) */}
-      {[-4.9, 4.9].map((x, i) => (
-        <group key={i} position={[x, 3.2, 5 + i * 4]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.45, 0.6, 0.9]} />
-            <meshStandardMaterial color="#94a3b8" metalness={0.4} roughness={0.5} />
-          </mesh>
-          <mesh position={[x < 0 ? 0.24 : -0.24, 0, 0]}>
-            <circleGeometry args={[0.22, 16]} />
-            <meshBasicMaterial color="#334155" />
-          </mesh>
-        </group>
       ))}
 
-      {/* --- ENTRANCE GATE & EVENT BANNER --- */}
-      <group position={[0, 3.8, 15]}>
-        {/* Gate bamboo posts */}
-        <mesh position={[-3.2, -1.8, 0]}>
-          <cylinderGeometry args={[0.08, 0.1, 4, 8]} />
-          <meshStandardMaterial color="#b45309" roughness={0.7} />
+      {/* concrete ceiling and exposed black services */}
+      <mesh position={[0, 5.3, -3.7]} receiveShadow>
+        <boxGeometry args={[20, 0.28, 40]} />
+        <meshStandardMaterial color={CONCRETE} roughness={0.96} />
+      </mesh>
+      {[-7.4, -2.2, 3.0, 8.2].map((z) => (
+        <mesh key={z} position={[0, 5.02, z]}>
+          <boxGeometry args={[18.5, 0.18, 0.28]} />
+          <meshStandardMaterial color={BLACK} roughness={0.48} />
         </mesh>
-        <mesh position={[3.2, -1.8, 0]}>
-          <cylinderGeometry args={[0.08, 0.1, 4, 8]} />
-          <meshStandardMaterial color="#b45309" roughness={0.7} />
+      ))}
+      <mesh position={[3.8, 4.95, -4.2]}>
+        <boxGeometry args={[0.48, 0.35, 25]} />
+        <meshStandardMaterial color="#202327" roughness={0.55} />
+      </mesh>
+
+      {/* outer walls / collision */}
+      <RigidBody type="fixed" colliders="cuboid">
+        <mesh position={[-9.75, 2.55, -3.8]} castShadow receiveShadow>
+          <boxGeometry args={[0.5, 5.1, 40]} />
+          <meshStandardMaterial color={WALL} roughness={0.93} />
         </mesh>
-        {/* Red company event banner */}
-        <mesh castShadow>
-          <boxGeometry args={[6.8, 1.1, 0.06]} />
-          <meshStandardMaterial color="#b91c1c" roughness={0.4} />
+        <mesh position={[9.75, 2.55, -3.8]} castShadow receiveShadow>
+          <boxGeometry args={[0.5, 5.1, 40]} />
+          <meshStandardMaterial color={WALL} roughness={0.93} />
         </mesh>
-        <Text
-          position={[0, 0.18, 0.04]}
-          fontSize={0.24}
-          color="#fef08a"
-          anchorX="center"
-          anchorY="middle"
-          fontWeight="bold"
-        >
-          LỄ HỘI RẰM THÁNG 8 CÔNG TY BÙ ĐẦU
-        </Text>
-        <Text
-          position={[0, -0.22, 0.04]}
-          fontSize={0.14}
-          color="#ffffff"
-          anchorX="center"
-          anchorY="middle"
-        >
-          ĐỊA ĐIỂM: LẦU 4 • VĂN PHÒNG GÒ DẦU
-        </Text>
-      </group>
-
-      {/* --- SECURITY GUARD BOOTH (CHỐT BẢO VỆ) --- */}
-      <group position={[3.6, 0, 13]}>
-        {/* Booth Cabin */}
-        <mesh position={[0, 1.25, 0]} castShadow>
-          <boxGeometry args={[1.6, 2.5, 1.6]} />
-          <meshStandardMaterial color="#0f766e" roughness={0.6} />
+        <mesh position={[0, 2.55, -23.55]} castShadow receiveShadow>
+          <boxGeometry args={[20, 5.1, 0.5]} />
+          <meshStandardMaterial color={WALL} roughness={0.93} />
         </mesh>
-        {/* Booth Window */}
-        <mesh position={[0, 1.4, -0.81]}>
-          <planeGeometry args={[1.1, 0.8]} />
-          <meshStandardMaterial color="#e0f2fe" metalness={0.9} roughness={0.1} />
+        <mesh position={[0, 2.55, 15.85]}>
+          <boxGeometry args={[20, 5.1, 0.4]} />
+          <meshStandardMaterial color={WALL} transparent opacity={0.08} />
         </mesh>
-        {/* Booth Sign */}
-        <Text
-          position={[0, 2.2, -0.82]}
-          fontSize={0.12}
-          color="#fef08a"
-          anchorX="center"
-          anchorY="middle"
-        >
-          CHỐT BẢO VỆ
-        </Text>
-      </group>
+      </RigidBody>
 
-      {/* --- HILARIOUS CORPORATE SIGNS ALONG ALLEY --- */}
-      <OfficeSign
-        text="PHÒNG HÀNH CHÍNH"
-        position={[-4.8, 3.4, 11]}
-        rotation={[0, Math.PI / 2, 0]}
-        bgColor="#1e3a8a"
-        textColor="#93c5fd"
-      />
-      <OfficeSign
-        text="KHÔNG TỰ Ý CẮM NỒI LẨU VÀO Ổ ĐIỆN SERVER"
-        position={[4.8, 3.5, 7.5]}
-        rotation={[0, -Math.PI / 2, 0]}
-        bgColor="#b91c1c"
-        textColor="#fef08a"
-      />
-      <OfficeSign
-        text="LỒNG ĐÈN ĐÃ QUA QA (Chưa test Prod)"
-        position={[-4.8, 3.5, 3]}
-        rotation={[0, Math.PI / 2, 0]}
-        bgColor="#15803d"
-        textColor="#86efac"
-      />
-      <OfficeSign
-        text="LỒNG ĐÈN CHƯA QUA QA (Dev tự tin lắm)"
-        position={[4.8, 3.5, 0]}
-        rotation={[0, -Math.PI / 2, 0]}
-        bgColor="#c2410c"
-        textColor="#fed7aa"
-      />
-      <OfficeSign
-        text="CREATIVE DEPT: SỬA LẦN CUỐI_FINAL_REAL"
-        position={[-4.8, 3.5, -4]}
-        rotation={[0, Math.PI / 2, 0]}
-        bgColor="#6b21a8"
-        textColor="#f0abfc"
-      />
-      <OfficeSign
-        text="BAN TỔ CHỨC: CHỊ HẰNG ĐANG XIN NGHỈ PHÉP"
-        position={[4.8, 3.5, -7]}
-        rotation={[0, -Math.PI / 2, 0]}
-        bgColor="#0369a1"
-        textColor="#bae6fd"
-      />
+      {/* large windows like the reference photos */}
+      <GlassWall position={[7.8, 2.6, 0.6]} width={9.2} height={4.0} rotation={[0, -Math.PI/2, 0]} />
+      <GlassWall position={[-0.2, 2.6, -22.3]} width={8.0} height={4.0} />
+      <mesh position={[8.4, 2.0, -3.2]} rotation={[0, -Math.PI/2, 0]}>
+        <planeGeometry args={[10, 3.2]} />
+        <meshStandardMaterial color="#a74939" roughness={0.95} />
+      </mesh>
 
-      {/* --- DIRECTION SIGNS TO THE PERSONAL LANTERN WORKSHOP --- */}
-      <OfficeSign
-        text="🏮 QUẦY LÀM LỒNG ĐÈN  ↓  ĐI THẲNG"
-        position={[4.8, 2.55, 9.2]}
-        rotation={[0, -Math.PI / 2, 0]}
-        bgColor="#92400e"
-        textColor="#fde68a"
-      />
-      <OfficeSign
-        text="📸 UP ẢNH LÀM LỒNG ĐÈN  ↓"
-        position={[-4.8, 2.55, 2.0]}
-        rotation={[0, Math.PI / 2, 0]}
-        bgColor="#7c2d12"
-        textColor="#fef3c7"
-      />
-      <OfficeSign
-        text="← QUẦY LÀM LỒNG ĐÈN • LẦU 4"
-        position={[4.8, 2.55, -6.8]}
-        rotation={[0, -Math.PI / 2, 0]}
-        bgColor="#854d0e"
-        textColor="#fef08a"
-      />
+      <ReceptionArea />
+      <WorkspaceArea />
+      <WorkshopArea />
+      <EventArea />
+      <BoothArea />
 
-      {/* --- FAIRY LIGHT STRINGS ZIG-ZAGGING OVERHEAD --- */}
-      <FairyLightsString start={[-4.8, 4.4, 13]} end={[4.8, 4.2, 9]} lightCount={12} />
-      <FairyLightsString start={[4.8, 4.2, 9]} end={[-4.8, 4.3, 5]} lightCount={12} />
-      <FairyLightsString start={[-4.8, 4.3, 5]} end={[4.8, 4.1, 1]} lightCount={12} />
-      <FairyLightsString start={[4.8, 4.1, 1]} end={[-4.8, 4.4, -3]} lightCount={12} />
-      <FairyLightsString start={[-4.8, 4.4, -3]} end={[4.8, 4.2, -7]} lightCount={12} />
-      <FairyLightsString start={[-7.5, 4.8, -11]} end={[7.5, 4.8, -11]} lightCount={16} />
+      <CeilingTrack z={12.3} length={7.5} />
+      <CeilingTrack z={8.5} x={-1.5} length={8.0} />
+      <CeilingTrack z={3.6} x={1.1} length={8.5} />
+      <CeilingTrack z={-1.5} x={-0.8} length={8.5} />
+      <CeilingTrack z={-7.0} x={0.5} length={9.0} />
+      <CeilingTrack z={-12.5} x={0.4} length={9.0} />
+      <CeilingTrack z={-18.0} x={0.8} length={8.0} />
 
-      {/* Mini stars hung overhead */}
-      <MiniStarLantern position={[-1.5, 3.6, 9]} />
-      <MiniStarLantern position={[2.0, 3.5, 5]} />
-      <MiniStarLantern position={[-0.8, 3.4, 1]} />
-      <MiniStarLantern position={[1.8, 3.6, -3]} />
+      <RoundedSign text="← WORKSHOP UID • QUẦY LÀM LỒNG ĐÈN" position={[-7.7, 2.9, -5.8]} rotation={[0, Math.PI/2, 0]} width={3.7} bg="#164e63" fg="#fff7db" fontSize={0.13} />
+      <RoundedSign text="KHU THẮP SÁNG →" position={[7.7, 2.9, -8.2]} rotation={[0, -Math.PI/2, 0]} width={3.2} bg="#9b2c25" fg="#fff0be" fontSize={0.15} />
 
-      {/* --- PROPS: FOLDING TABLES & PLASTIC STOOLS --- */}
-      {/* Table 1 with stools */}
-      <FoldingTable position={[-3.2, 0, 7.5]} rotation={[0, 0.1, 0]} />
-      <PlasticStool position={[-3.6, 0, 8.2]} color="#dc2626" />
-      <PlasticStool position={[-2.8, 0, 8.2]} color="#2563eb" />
-      <PlasticStool position={[-3.6, 0, 6.8]} color="#dc2626" />
-
-      {/* Table 2 with stools in Lantern Market */}
-      <FoldingTable position={[3.2, 0, 2.5]} rotation={[0, -0.15, 0]} />
-      <PlasticStool position={[3.6, 0, 3.2]} color="#16a34a" />
-      <PlasticStool position={[2.8, 0, 3.2]} color="#dc2626" />
-
-      {/* Table 3 in Market */}
-      <FoldingTable position={[-3.2, 0, -2.5]} rotation={[0, 0.2, 0]} />
-      <PlasticStool position={[-3.5, 0, -1.8]} color="#2563eb" />
-      <PlasticStool position={[-2.8, 0, -3.2]} color="#dc2626" />
-
-      {/* Stools scattered around Courtyard */}
-      <PlasticStool position={[-2.5, 0, -11]} color="#dc2626" />
-      <PlasticStool position={[-3.4, 0, -12]} color="#16a34a" />
-      <PlasticStool position={[2.6, 0, -11]} color="#2563eb" />
-      <PlasticStool position={[3.5, 0, -12.5]} color="#dc2626" />
-
-      {/* Cardboard boxes stacked in corners */}
-      <CardboardBox position={[-4.2, 0, 12]} rotation={[0, 0.3, 0]} label="CHIPS_snack" />
-      <CardboardBox position={[-4.4, 0, 11.2]} rotation={[0, -0.2, 0]} label="BANH_TRUNG_THU" />
-      <CardboardBox position={[-4.3, 0.6, 11.5]} rotation={[0, 0.1, 0]} scale={[0.8, 0.8, 0.8]} label="FINAL_FINAL_v7" />
-      <CardboardBox position={[4.2, 0, 10.5]} rotation={[0, -0.4, 0]} label="DAY_DIEN_CU" />
-      <CardboardBox position={[4.1, 0, -5]} rotation={[0, 0.5, 0]} label="TAI_LIEU_QA" />
-
-      {/* Potted kumquat / decorative office tree */}
-      <group position={[-3.8, 0, 14]}>
-        <mesh position={[0, 0.3, 0]}>
-          <cylinderGeometry args={[0.3, 0.22, 0.6, 12]} />
-          <meshStandardMaterial color="#991b1b" roughness={0.5} />
-        </mesh>
-        <mesh position={[0, 1.1, 0]}>
-          <sphereGeometry args={[0.6, 10, 10]} />
-          <meshStandardMaterial color="#15803d" roughness={0.8} />
-        </mesh>
-        {/* Tiny oranges */}
-        {[[0.3, 1.2, 0.3], [-0.3, 1.0, 0.4], [0.4, 0.9, -0.2], [-0.2, 1.3, -0.3]].map(([ox, oy, oz], oi) => (
-          <mesh key={oi} position={[ox, oy, oz]}>
-            <sphereGeometry args={[0.07, 8, 8]} />
-            <meshStandardMaterial color="#ea580c" roughness={0.3} />
-          </mesh>
-        ))}
-      </group>
-
-      {/* Water cooler near entrance */}
-      <group position={[3.8, 0, 11.5]}>
-        <mesh position={[0, 0.5, 0]}>
-          <boxGeometry args={[0.4, 1.0, 0.4]} />
-          <meshStandardMaterial color="#e2e8f0" roughness={0.3} />
-        </mesh>
-        <mesh position={[0, 1.3, 0]}>
-          <cylinderGeometry args={[0.2, 0.2, 0.6, 12]} />
-          <meshStandardMaterial color="#38bdf8" transparent opacity={0.6} roughness={0.1} />
-        </mesh>
-      </group>
+      {/* some workshop clutter / handmade feel */}
+      <mesh position={[-7.4, 0.28, -7.9]} rotation={[0, 0.28, 0]} castShadow>
+        <boxGeometry args={[1.15, 0.55, 0.75]} />
+        <meshStandardMaterial color="#a56f3e" roughness={0.92} />
+      </mesh>
+      <mesh position={[-7.1, 0.62, -8.0]} rotation={[0, -0.18, 0]} castShadow>
+        <boxGeometry args={[0.8, 0.18, 0.6]} />
+        <meshStandardMaterial color="#c38b4d" roughness={0.9} />
+      </mesh>
+      <mesh position={[-6.65, 0.86, -8.1]} rotation={[0, 0, -0.7]}>
+        <cylinderGeometry args={[0.028, 0.028, 0.86, 8]} />
+        <meshStandardMaterial color="#8fa34c" roughness={0.85} />
+      </mesh>
     </group>
   );
 }
