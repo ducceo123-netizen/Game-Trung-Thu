@@ -7,20 +7,20 @@ export function IntroSequence() {
   const setGamePhase = useGameStore((s) => s.setGamePhase);
 
   useEffect(() => {
-    // Step 0: "23:47"
+    // Step 0: "17:25"
     sounds.playZap();
     const t1 = setTimeout(() => {
       setStep(1);
       sounds.playBlip(300);
     }, 1800);
 
-    // Step 1: "Có đứa vừa cắm nồi lẩu vào ổ điện."
+    // Step 1: contest setup problem
     const t2 = setTimeout(() => {
       setStep(2);
       sounds.playZap();
     }, 4200);
 
-    // Step 2: "Mặt trăng đã mất kết nối."
+    // Step 2: team mission
     const t3 = setTimeout(() => {
       setStep(3);
       sounds.playAchievement();
@@ -56,7 +56,7 @@ export function IntroSequence() {
         {/* Step 1: Có đứa vừa cắm nồi lẩu vào ổ điện */}
         {step >= 1 && (
           <div className="p-4 bg-red-950/40 border border-red-800 rounded-lg text-lg sm:text-xl font-semibold text-amber-200">
-            “Có đứa vừa cắm nồi lẩu vào ổ điện.”
+            “Còn 20 phút nữa là tới giờ chấm lồng đèn.”
           </div>
         )}
 
@@ -64,10 +64,10 @@ export function IntroSequence() {
         {step >= 2 && (
           <div className="p-4 bg-slate-900 border-2 border-red-600 rounded-lg space-y-2">
             <div className="text-2xl sm:text-3xl font-bold text-red-400">
-              ⚠️ MẶT TRĂNG ĐÃ MẤT KẾT NỐI
+              ⚠️ KHU THẮP SÁNG CHƯA SETUP XONG
             </div>
             <p className="text-xs text-slate-400 font-mono">
-              Mã lỗi: CRITICAL_CIRCUIT_OVERLOAD_HOTPOT_ERR
+              BTC đang thiếu 3 món: ổ cắm • súng keo • remote LED
             </p>
           </div>
         )}
@@ -76,10 +76,10 @@ export function IntroSequence() {
         {step >= 3 && (
           <div className="pt-4 space-y-6 animate-bounce">
             <div className="bg-yellow-400 text-slate-950 px-6 py-4 rounded-lg font-extrabold text-xl sm:text-2xl shadow-xl">
-              🏮 NHIỆM VỤ: KHỞI ĐỘNG LẠI TRUNG THU 🏮
+              🏮 NHIỆM VỤ: CẢ LẦU 4 CÙNG LÊN ĐÈN 🏮
             </div>
             <p className="text-sm text-yellow-200">
-              Bắt đầu ở khu reception UID, gặp Chú Bảo Vệ rồi khám phá Lầu 4!
+              Chia nhau tìm đồ setup, làm lồng đèn từ ảnh team, rồi mang ra sân khấu thắp sáng.
             </p>
             <button
               onClick={handleSkipOrStart}
