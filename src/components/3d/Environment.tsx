@@ -273,7 +273,7 @@ function ReceptionArea() {
         <meshStandardMaterial color={ORANGE} roughness={0.55} />
       </mesh>
       <Planter position={[3.2, 0, -0.15]} length={3.7} depth={1.15} height={1.15} />
-      <RoundedSign text="UID • LẦU 4 • VĂN PHÒNG GÒ DẦU" position={[0.3, 3.3, -0.95]} width={5.4} bg="#f3f0e8" fg="#154b70" fontSize={0.2} />
+      <RoundedSign text="UID • LẦU 2 • VĂN PHÒNG GÒ DẦU" position={[0.3, 3.3, -0.95]} width={5.4} bg="#f3f0e8" fg="#154b70" fontSize={0.2} />
       <RoundedSign text="HỘI THI LỒNG ĐÈN THỦ CÔNG" position={[0.3, 2.55, -0.96]} width={4.6} bg="#d86638" fg="#fff9df" fontSize={0.16} />
     </group>
   );
@@ -398,6 +398,38 @@ function GlassWall({ position, width = 8, height = 4.2, rotation = [0,0,0] }: { 
   );
 }
 
+function StaircaseToFloor3() {
+  return (
+    <group position={[7.1, 0, -4.0]}>
+      {Array.from({ length: 8 }).map((_, i) => (
+        <mesh key={i} position={[0, 0.14 + i * 0.18, -i * 0.42]} castShadow receiveShadow>
+          <boxGeometry args={[2.2, 0.28, 0.46]} />
+          <meshStandardMaterial color="#d8c3a5" roughness={0.8} />
+        </mesh>
+      ))}
+      <mesh position={[-1.1, 1.15, -1.45]} rotation={[0, 0, -0.42]}>
+        <cylinderGeometry args={[0.025, 0.025, 3.5, 8]} />
+        <meshStandardMaterial color="#1f2937" metalness={0.55} roughness={0.35} />
+      </mesh>
+      <mesh position={[1.1, 1.15, -1.45]} rotation={[0, 0, -0.42]}>
+        <cylinderGeometry args={[0.025, 0.025, 3.5, 8]} />
+        <meshStandardMaterial color="#1f2937" metalness={0.55} roughness={0.35} />
+      </mesh>
+      <RoundedSign
+        text="CẦU THANG LÊN LẦU 3 • BẤM E"
+        position={[0, 2.35, 0.6]}
+        width={3.9}
+        bg="#3f2a56"
+        fg="#f3e8ff"
+        fontSize={0.14}
+      />
+      <Text position={[0, 1.75, 0.58]} fontSize={0.11} color="#7f1d1d" anchorX="center" anchorY="middle">
+        Halloween Zone • cân nhắc trước khi lên
+      </Text>
+    </group>
+  );
+}
+
 export function Environment() {
   return (
     <group>
@@ -471,6 +503,7 @@ export function Environment() {
       <WorkshopArea />
       <EventArea />
       <BoothArea />
+      <StaircaseToFloor3 />
 
       <CeilingTrack z={12.3} length={7.5} />
       <CeilingTrack z={8.5} x={-1.5} length={8.0} />
@@ -481,7 +514,7 @@ export function Environment() {
       <CeilingTrack z={-18.0} x={0.8} length={8.0} />
 
       <RoundedSign text="← WORKSHOP UID • QUẦY LÀM LỒNG ĐÈN" position={[-7.7, 2.9, -5.8]} rotation={[0, Math.PI/2, 0]} width={3.7} bg="#164e63" fg="#fff7db" fontSize={0.13} />
-      <RoundedSign text="KHU THẮP SÁNG →" position={[7.7, 2.9, -8.2]} rotation={[0, -Math.PI/2, 0]} width={3.2} bg="#9b2c25" fg="#fff0be" fontSize={0.15} />
+      <RoundedSign text="SĂN 3 BÁNH TRUNG THU ✈ 3.000.000đ" position={[7.7, 2.9, -8.2]} rotation={[0, -Math.PI/2, 0]} width={4.4} bg="#9b2c25" fg="#fff0be" fontSize={0.12} />
 
       {/* some workshop clutter / handmade feel */}
       <mesh position={[-7.4, 0.28, -7.9]} rotation={[0, 0.28, 0]} castShadow>
