@@ -7,6 +7,10 @@ import { sounds } from '../../utils/soundEffects';
 import { PlayerLantern } from './PlayerLantern';
 import { BloodBurst } from './BloodBurst';
 import { SOCIAL_POST_POSITION } from './SocialPostBoard';
+import { ITEM_SHOP_POSITION } from './ItemShop';
+import { ANH_KHOE_POSITION } from './AnhKhoeNPC';
+import { PlayerEquipment } from './PlayerEquipment';
+import { useEconomyStore } from '../../stores/useEconomyStore';
 
 // Keyboard movement state tracker
 interface KeysState {
@@ -42,6 +46,12 @@ export function Player() {
   const openWorkshop = useGameStore((s) => s.openWorkshop);
   const socialPostOpen = useGameStore((s) => s.socialPostOpen);
   const openSocialPost = useGameStore((s) => s.openSocialPost);
+  const shopOpen = useEconomyStore((s) => s.shopOpen);
+  const openShop = useEconomyStore((s) => s.openShop);
+  const worldMooncakes = useEconomyStore((s) => s.worldMooncakes);
+  const claimWorldMooncake = useEconomyStore((s) => s.claimMooncake);
+  const praiseAnhKhoe = useEconomyStore((s) => s.praiseAnhKhoe);
+  const equippedItem = useEconomyStore((s) => s.equippedItem);
   const personalLanternBuilt = useGameStore((s) => s.personalLanternBuilt);
   const personalLanternLit = useGameStore((s) => s.personalLanternLit);
   const togglePersonalLanternLight = useGameStore((s) => s.togglePersonalLanternLight);
@@ -170,6 +180,7 @@ export function Player() {
       if (useGameStore.getState().gamePhase !== 'playing') return;
       if (useGameStore.getState().workshopOpen) return;
       if (useGameStore.getState().socialPostOpen) return;
+      if (useEconomyStore.getState().shopOpen) return;
       if (useGameStore.getState().isDead) return;
       if ((e.target as HTMLElement).closest('.interactive-ui')) return;
 
@@ -189,7 +200,7 @@ export function Player() {
       if ((e.target as HTMLElement).closest('.interactive-ui')) return;
       if (e.button !== 0) return;
       const state = useGameStore.getState();
-      if (state.isDead || state.socialPostOpen) return;
+      if (state.isDead || state.socialPostOpen || useEconomyStore.getState().shopOpen) return;
       if (state.personalLanternBuilt) {
         attackWithLantern();
       } else if (hasBambooPole) {
@@ -254,7 +265,7 @@ export function Player() {
 
   useFrame((state, delta) => {
     if (gamePhase !== 'playing') return;
-    if (workshopOpen || socialPostOpen) return;
+    if (workshopOpen || socialPostOpen || shopOpen) return;
 
     if (isDead) {
       if (playerRef.current) {
@@ -472,7 +483,55 @@ export function Player() {
     }
     if (nearQuestItem) return;
 
-    // 3. UID culture social post
+    // 3. Continuously spawning mooncake currency
+    for (const cake of worldMooncakes) {
+      const dist = playerPos.distanceTo(new THREE.Vector3(cake.x, 0.5, cake.z));
+      if (dist < 1.7) {
+        setInteractionPrompt({
+          text: cake.source === 'drop'
+            ? '🌕 [E] Nhặt bánh người chơi vừa làm rơi'
+            : '🌕 [E] Nhặt bánh Trung Thu',
+          action: async () => {
+            const ok = await claimWorldMooncake(cake.id, playerName);
+            showAchievement({
+              id: `cake_${cake.id}`,
+              title: ok ? '🌕 +1 BÁNH TRUNG THU' : 'CHẬM MỘT NHỊP',
+              subtitle: ok ? 'Đã cộng vào ví. Dùng để mua đồ ở tiệm.' : 'Có người vừa nhặt trước bạn.',
+            });
+          },
+        });
+        return;
+      }
+    }
+
+    // 4. Anh Khoẻ — compliment once for 10 cakes
+    const khoeDist = playerPos.distanceTo(new THREE.Vector3(ANH_KHOE_POSITION[0], 0.5, ANH_KHOE_POSITION[2]));
+    if (khoeDist < 2.3) {
+      setInteractionPrompt({
+        text: '😎 [E] Khen anh Khoẻ đẹp trai',
+        action: async () => {
+          const granted = await praiseAnhKhoe(playerName);
+          showAchievement({
+            id: 'anh_khoe_reward',
+            title: granted ? '😎 ANH KHOẺ VUI RỒI' : 'ANH KHOẺ NHỚ MÀ',
+            subtitle: granted ? '“Biết nhìn người đó em.” +10 bánh Trung Thu!' : 'Mỗi người chỉ được khen lấy quà một lần thôi nha :))',
+          });
+        },
+      });
+      return;
+    }
+
+    // 5. Item shop
+    const shopDist = playerPos.distanceTo(new THREE.Vector3(ITEM_SHOP_POSITION[0],0.5,ITEM_SHOP_POSITION[2]));
+    if (shopDist < 2.8) {
+      setInteractionPrompt({
+        text: '🛒 [E] Mở TIỆM ĐỒ TRUNG THU',
+        action: () => openShop(),
+      });
+      return;
+    }
+
+    // 6. UID culture social post
     const socialPostDist = playerPos.distanceTo(
       new THREE.Vector3(SOCIAL_POST_POSITION[0], 0.5, SOCIAL_POST_POSITION[2]),
     );
@@ -484,7 +543,7 @@ export function Player() {
       return;
     }
 
-    // 4. Personal Lantern Workshop check (UID Floor 2)
+    // 7. Personal Lantern Workshop check (UID Floor 2)
     const workshopDist = playerPos.distanceTo(new THREE.Vector3(-5.4, 0.5, -9.7));
     if (workshopDist < 3.0) {
       setInteractionPrompt({
@@ -496,7 +555,7 @@ export function Player() {
       return;
     }
 
-    // 5. Lanterns proximity check
+    // 8. Lanterns proximity check
     const lanternDistances = [
       {
         name: 'LỒNG ĐÈN SALONPAS',
@@ -643,6 +702,7 @@ export function Player() {
 
         {/* Personal photo lantern follows the player after workshop build */}
         <PlayerLantern />
+        <PlayerEquipment />
         <BloodBurst />
 
         {/* --- THE SIGNATURE BAMBOO POLE WITH HOOK TIP --- */}
