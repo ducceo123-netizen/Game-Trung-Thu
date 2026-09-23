@@ -13,6 +13,8 @@ export function RetroHUD() {
   const isSlowed = useGameStore((s) => s.isSlowed);
   const sodiumLevel = useGameStore((s) => s.sodiumLevel);
   const triggerBambooPoke = useGameStore((s) => s.triggerBambooPoke);
+  const personalLanternBuilt = useGameStore((s) => s.personalLanternBuilt);
+  const personalLanternLit = useGameStore((s) => s.personalLanternLit);
 
   const [isMuted, setIsMuted] = useState(sounds.getMuted());
 
@@ -123,6 +125,19 @@ export function RetroHUD() {
               🎋 Chưa có cây tre (Gặp Chú Bảo Vệ)
             </div>
           )}
+
+          {/* Personal lantern workshop status */}
+          <div className="bg-amber-950/85 border border-amber-500 text-amber-200 px-2.5 py-1 text-[11px] font-mono rounded max-w-[260px] text-right">
+            <div className="font-bold text-yellow-300">🏮 QUẦY LÀM LỒNG ĐÈN</div>
+            <div>
+              {personalLanternLit
+                ? 'Đèn cá nhân: ĐÃ THẮP SÁNG ✨'
+                : personalLanternBuilt
+                  ? 'Đèn cá nhân: ĐÃ LÀM XONG — tới quầy bấm E để thắp'
+                  : 'Đi theo bảng chỉ dẫn → up ảnh → làm lồng đèn'}
+            </div>
+            <div className="text-amber-400/80">Lầu 4 • Văn phòng Gò Dầu</div>
+          </div>
 
           {/* Active Buffs / Debuffs Status */}
           <div className="flex flex-col items-end gap-1 text-[11px] font-mono">
