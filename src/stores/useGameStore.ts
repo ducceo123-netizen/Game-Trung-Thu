@@ -319,6 +319,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       get().setTeamAnnouncement(`💥 ${attackerName} vừa hạ ${state.playerName} bằng lồng đèn!`);
       void useEconomyStore.getState().dropOnDeath(
         state.playerName,
+        state.currentFloor,
         state.playerPosition[0],
         state.playerPosition[2],
       ).then((dropped) => {
