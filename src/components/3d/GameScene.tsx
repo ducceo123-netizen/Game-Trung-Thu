@@ -19,9 +19,10 @@ export function GameScene() {
   return (
     <div className="w-full h-full relative cursor-crosshair">
       <Canvas
-        shadows
-        camera={{ position: [0, 5, 20], fov: 50, near: 0.1, far: 100 }}
-        gl={{ antialias: true, alpha: false }}
+        dpr={[1, 1.25]}
+        shadows={false}
+        camera={{ position: [0, 5, 20], fov: 50, near: 0.1, far: 70 }}
+        gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
       >
         <Suspense fallback={null}>
           <Physics gravity={[0, -9.81, 0]}>
@@ -39,15 +40,6 @@ export function GameScene() {
               position={[8, 22, -15]}
               intensity={moonOnline ? 2.2 : 1.15}
               color={moonOnline ? '#fff7e6' : '#f3f4f6'}
-              castShadow
-              shadow-mapSize-width={1024}
-              shadow-mapSize-height={1024}
-              shadow-camera-near={0.5}
-              shadow-camera-far={60}
-              shadow-camera-left={-20}
-              shadow-camera-right={20}
-              shadow-camera-top={20}
-              shadow-camera-bottom={-20}
             />
 
             {/* Neutral office fill + restrained warm lantern accent */}
