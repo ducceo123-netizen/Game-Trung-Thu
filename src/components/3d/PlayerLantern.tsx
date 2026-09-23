@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
+import { Text } from '@react-three/drei';
 import { useGameStore } from '../../stores/useGameStore';
 
 export function PlayerLantern() {
@@ -8,6 +9,7 @@ export function PlayerLantern() {
   const equipped = useGameStore((s) => s.playerHasLanternEquipped);
   const lit = useGameStore((s) => s.personalLanternLit);
   const shape = useGameStore((s) => s.personalLanternShapeMode);
+  const lanternText = useGameStore((s) => s.personalLanternText);
   const carryRef = useRef<THREE.Group>(null);
   const swingRef = useRef<THREE.Group>(null);
   const attackProgress = useRef(0);
@@ -65,7 +67,7 @@ export function PlayerLantern() {
     }
   });
 
-  if (!equipped || !imageData) return null;
+  if (!equipped || (!imageData && !lanternText.trim())) return null;
 
   const bodySize: [number, number, number] =
     shape === 'portrait' ? [0.52, 0.78, 0.12] :
@@ -113,6 +115,33 @@ export function PlayerLantern() {
             roughness={0.72}
           />
         </mesh>
+
+        {lanternText.trim() && (
+          <group position={[0, -bodySize[1]*0.18, 0.085]}>
+            <mesh>
+              <planeGeometry args={[bodySize[0]*0.92, Math.min(0.32, bodySize[1]*0.38)]} />
+              <meshBasicMaterial color="#111827" transparent opacity={0.76} />
+            </mesh>
+            <Text
+              position={[0,0,0.01]}
+              fontSize={0.07}
+              maxWidth={bodySize[0]*0.8}
+              textAlign="center"
+              color="#fff7d6"
+              anchorX="center"
+              anchorY="middle"
+            >
+              {lanternText}
+            </Text>
+          </group>
+        )}
+
+        {attackProgress.current > 0 && (
+          <mesh position={[0.25,0,0]} rotation={[0,0,Math.PI/2]}>
+            <torusGeometry args={[0.72,0.035,6,18,Math.PI*0.75]} />
+            <meshBasicMaterial color="#fff3b0" transparent opacity={0.48} />
+          </mesh>
+        )}
 
         {/* simple LED frame */}
         {[
