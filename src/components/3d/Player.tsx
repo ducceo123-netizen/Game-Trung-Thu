@@ -6,6 +6,7 @@ import { useGameStore } from '../../stores/useGameStore';
 import { sounds } from '../../utils/soundEffects';
 import { PlayerLantern } from './PlayerLantern';
 import { BloodBurst } from './BloodBurst';
+import { SOCIAL_POST_POSITION } from './SocialPostBoard';
 
 // Keyboard movement state tracker
 interface KeysState {
@@ -39,6 +40,8 @@ export function Player() {
   const setInteractionPrompt = useGameStore((s) => s.setInteractionPrompt);
   const workshopOpen = useGameStore((s) => s.workshopOpen);
   const openWorkshop = useGameStore((s) => s.openWorkshop);
+  const socialPostOpen = useGameStore((s) => s.socialPostOpen);
+  const openSocialPost = useGameStore((s) => s.openSocialPost);
   const personalLanternBuilt = useGameStore((s) => s.personalLanternBuilt);
   const personalLanternLit = useGameStore((s) => s.personalLanternLit);
   const togglePersonalLanternLight = useGameStore((s) => s.togglePersonalLanternLight);
@@ -166,6 +169,7 @@ export function Player() {
     const handleMouseMove = (e: MouseEvent) => {
       if (useGameStore.getState().gamePhase !== 'playing') return;
       if (useGameStore.getState().workshopOpen) return;
+      if (useGameStore.getState().socialPostOpen) return;
       if (useGameStore.getState().isDead) return;
       if ((e.target as HTMLElement).closest('.interactive-ui')) return;
 
@@ -185,7 +189,7 @@ export function Player() {
       if ((e.target as HTMLElement).closest('.interactive-ui')) return;
       if (e.button !== 0) return;
       const state = useGameStore.getState();
-      if (state.isDead) return;
+      if (state.isDead || state.socialPostOpen) return;
       if (state.personalLanternBuilt) {
         attackWithLantern();
       } else if (hasBambooPole) {
@@ -250,7 +254,7 @@ export function Player() {
 
   useFrame((state, delta) => {
     if (gamePhase !== 'playing') return;
-    if (workshopOpen) return;
+    if (workshopOpen || socialPostOpen) return;
 
     if (isDead) {
       if (playerRef.current) {
@@ -468,7 +472,19 @@ export function Player() {
     }
     if (nearQuestItem) return;
 
-    // 3. Personal Lantern Workshop check (UID Floor 2)
+    // 3. UID culture social post
+    const socialPostDist = playerPos.distanceTo(
+      new THREE.Vector3(SOCIAL_POST_POSITION[0], 0.5, SOCIAL_POST_POSITION[2]),
+    );
+    if (socialPostDist < 2.25) {
+      setInteractionPrompt({
+        text: '📱 [E] Xem post UIDers Quốc Khánh',
+        action: () => openSocialPost(),
+      });
+      return;
+    }
+
+    // 4. Personal Lantern Workshop check (UID Floor 2)
     const workshopDist = playerPos.distanceTo(new THREE.Vector3(-5.4, 0.5, -9.7));
     if (workshopDist < 3.0) {
       setInteractionPrompt({
@@ -480,7 +496,7 @@ export function Player() {
       return;
     }
 
-    // 4. Lanterns proximity check
+    // 5. Lanterns proximity check
     const lanternDistances = [
       {
         name: 'LỒNG ĐÈN SALONPAS',
