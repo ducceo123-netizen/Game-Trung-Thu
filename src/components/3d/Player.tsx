@@ -4,6 +4,7 @@ import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameStore } from '../../stores/useGameStore';
 import { sounds } from '../../utils/soundEffects';
+import { PlayerLantern } from './PlayerLantern';
 
 // Keyboard movement state tracker
 interface KeysState {
@@ -40,6 +41,10 @@ export function Player() {
   const personalLanternBuilt = useGameStore((s) => s.personalLanternBuilt);
   const personalLanternLit = useGameStore((s) => s.personalLanternLit);
   const lightPersonalLantern = useGameStore((s) => s.lightPersonalLantern);
+  const togglePersonalLanternLight = useGameStore((s) => s.togglePersonalLanternLight);
+  const currentFloor = useGameStore((s) => s.currentFloor);
+  const setCurrentFloor = useGameStore((s) => s.setCurrentFloor);
+  const setPlayerPosition = useGameStore((s) => s.setPlayerPosition);
   const questItems = useGameStore((s) => s.questItems);
   const collectedIds = useGameStore((s) => s.collectedItemIds);
   const collectItem = useGameStore((s) => s.collectItem);
@@ -65,6 +70,7 @@ export function Player() {
   const rotationY = useRef(Math.PI); // Facing inward (toward alley)
   const cameraYaw = useRef(Math.PI);
   const cameraPitch = useRef(0.28);
+  const lastPositionSync = useRef(0);
 
   const keys = useRef<KeysState>({
     forward: false,
@@ -110,8 +116,11 @@ export function Player() {
           keys.current.interact = true;
           break;
         case 'KeyF':
-          // Poke with bamboo pole
-          triggerBambooPoke();
+          if (useGameStore.getState().personalLanternBuilt) {
+            togglePersonalLanternLight();
+          } else if (hasBambooPole) {
+            triggerBambooPoke();
+          }
           break;
       }
     };
@@ -183,7 +192,21 @@ export function Player() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [hasBambooPole, triggerBambooPoke]);
+  }, [hasBambooPole, triggerBambooPoke, togglePersonalLanternLight]);
+
+  // Floor transition spawn points.
+  useEffect(() => {
+    if (currentFloor === 3) {
+      pos.current.set(0, 0.5, 11.2);
+      cameraYaw.current = Math.PI;
+      rotationY.current = Math.PI;
+    } else {
+      pos.current.set(7.0, 0.5, -1.8);
+      cameraYaw.current = Math.PI;
+      rotationY.current = Math.PI;
+    }
+    setInteractionPrompt(null);
+  }, [currentFloor, setInteractionPrompt]);
 
   // Handle interact key trigger
   useEffect(() => {
@@ -254,9 +277,13 @@ export function Player() {
     while (facingDiff < -Math.PI) facingDiff += Math.PI * 2;
     rotationY.current += facingDiff * Math.min(1, delta * 18);
 
-    // Bounds check for the wider UID Go Dau floor-4 layout
-    pos.current.x = Math.max(-8.8, Math.min(8.8, pos.current.x));
-    pos.current.z = Math.max(-22.8, Math.min(15.2, pos.current.z));
+    // Bounds for each playable floor.
+    pos.current.x = Math.max(-8.6, Math.min(8.6, pos.current.x));
+    if (currentFloor === 2) {
+      pos.current.z = Math.max(-22.8, Math.min(15.2, pos.current.z));
+    } else {
+      pos.current.z = Math.max(-14.0, Math.min(13.6, pos.current.z));
+    }
 
     // Jump & gravity
     if (keys.current.jump && isGrounded.current) {
@@ -299,6 +326,13 @@ export function Player() {
       playerRef.current.rotation.y = rotationY.current;
     }
 
+    // Low-frequency position sync for Boo chase; avoids a Zustand update every frame.
+    const now = state.clock.elapsedTime;
+    if (now - lastPositionSync.current > 0.12) {
+      lastPositionSync.current = now;
+      setPlayerPosition([pos.current.x, pos.current.y, pos.current.z]);
+    }
+
     // Bamboo pole poke swing animation
     if (poleRef.current) {
       if (pokeProgress.current > 0) {
@@ -329,6 +363,29 @@ export function Player() {
     // =========================================================
     const playerPos = pos.current;
 
+    if (currentFloor === 3) {
+      const stairDownDist = playerPos.distanceTo(new THREE.Vector3(0, 0.5, 12.3));
+      if (stairDownDist < 3.2) {
+        setInteractionPrompt({
+          text: '⬇️ [E] CHẠY XUỐNG LẦU 2',
+          action: () => setCurrentFloor(2),
+        });
+        return;
+      }
+      setInteractionPrompt(null);
+      return;
+    }
+
+    // Floor 2 staircase to Halloween zone.
+    const stairUpDist = playerPos.distanceTo(new THREE.Vector3(7.1, 0.5, -4.0));
+    if (stairUpDist < 3.0) {
+      setInteractionPrompt({
+        text: '👻 [E] LÊN LẦU 3 — HALLOWEEN ZONE',
+        action: () => setCurrentFloor(3),
+      });
+      return;
+    }
+
     // 1. Security Guard check (near [2.2, 0, 12])
     const guardDist = playerPos.distanceTo(new THREE.Vector3(2.2, 0.5, 12));
     if (guardDist < 2.5 && !activeDialogue) {
@@ -339,10 +396,10 @@ export function Player() {
             startDialogue({
               speaker: 'CHÚ BẢO VỆ',
               lines: [
-                '“Ê, còn chút nữa là tới giờ chấm lồng đèn rồi.”',
-                '“BTC đang thiếu đúng 3 món để set up khu thắp sáng: ổ cắm, súng keo và remote LED.”',
-                '“Mấy team chạy tứ tung ở Lầu 4, ai gom nhanh thì về workshop làm đèn trước.”',
-                '“Cầm cây tre này đi. Vừa tìm đồ, vừa chọc thử mấy cái lồng đèn bựa quanh văn phòng cho vui.”',
+                '“Ê, BTC giấu 3 bánh Trung Thu bí mật quanh Lầu 2 đó.”',
+                '“Mỗi bánh có một vé máy bay nội địa trị giá 3 triệu.”',
+                '“Tìm bánh xong nhớ ghé Workshop UID up ảnh làm lồng đèn của mình.”',
+                '“Làm xong cầm đèn đi chơi được luôn. Còn Lầu 3... nghe nói có Boo.”',
               ],
               currentLineIndex: 0,
               onComplete: () => {
@@ -353,9 +410,9 @@ export function Player() {
             startDialogue({
               speaker: 'CHÚ BẢO VỆ',
               lines: [
-                '“Có tre rồi thì chạy đi gom đủ 3 món setup nha.”',
-                '“Xong ghé Workshop UID, up ảnh team làm lồng đèn rồi mang ra khu thắp sáng.”',
-                '“Nhiều người chơi thì chia nhau tìm mỗi người một món cho lẹ!”',
+                '“3 bánh nằm rải quanh Lầu 2, nhìn kỹ mấy góc khuất nha.”',
+                '“Workshop ở phía trong. Làm xong nhấn F để bật tắt đèn.”',
+                '“Muốn thử gan thì lên Lầu 3. Nếu có tín hiệu lạ thì chạy xuống đây.”',
               ],
               currentLineIndex: 0,
             });
@@ -373,7 +430,7 @@ export function Player() {
       if (dist < 2.0) {
         nearQuestItem = true;
         setInteractionPrompt({
-          text: `[E] Nhặt: ${item.vietnameseName}`,
+          text: `🌕 [E] MỞ: ${item.vietnameseName}`,
           action: () => collectItem(item.id),
         });
         break;
@@ -381,7 +438,7 @@ export function Player() {
     }
     if (nearQuestItem) return;
 
-    // 3. Personal Lantern Workshop check (UID Floor 4)
+    // 3. Personal Lantern Workshop check (UID Floor 2)
     const workshopDist = playerPos.distanceTo(new THREE.Vector3(-5.4, 0.5, -9.7));
     if (workshopDist < 3.0) {
       setInteractionPrompt({
@@ -393,62 +450,7 @@ export function Player() {
       return;
     }
 
-    // 4. Lighting Stage check — finished lantern must be brought here to light
-    const lightingStageDist = playerPos.distanceTo(new THREE.Vector3(5.5, 0.5, -14.0));
-    if (lightingStageDist < 3.2) {
-      if (!personalLanternBuilt) {
-        setInteractionPrompt({
-          text: '🏮 [E] KHU THẮP SÁNG — Bạn chưa làm lồng đèn',
-          action: () =>
-            showAchievement({
-              id: 'need_personal_lantern',
-              title: 'CHƯA CÓ LỒNG ĐÈN',
-              subtitle: 'Đi theo bảng ← WORKSHOP UID, up ảnh và làm lồng đèn trước nha!',
-            }),
-        });
-      } else if (!personalLanternLit) {
-        setInteractionPrompt({
-          text: '✨ [E] THẮP SÁNG LỒNG ĐÈN CỦA BẠN',
-          action: () => lightPersonalLantern(),
-        });
-      } else {
-        setInteractionPrompt({
-          text: '✨ Lồng đèn của bạn đang sáng — [E] khoe thành quả',
-          action: () =>
-            showAchievement({
-              id: 'lantern_showcase',
-              title: 'UID MID-AUTUMN SHOWCASE',
-              subtitle: 'Đèn đã lên! Ảnh của bạn đang phát sáng ở Lầu 4 Gò Dầu ✨',
-            }),
-        });
-      }
-      return;
-    }
-
-    // 5. Moon Server Machine check (near [0, 0, -17.5])
-    const serverDist = playerPos.distanceTo(new THREE.Vector3(0, 0.5, -16.5));
-    if (serverDist < 3.2) {
-      if (collectedIds.length === 3) {
-        setInteractionPrompt({
-          text: '⚡ [E] KHỞI ĐỘNG LẠI MẶT TRĂNG (REBOOT MOON SERVER)',
-          action: () => rebootMoonServer(),
-        });
-      } else {
-        setInteractionPrompt({
-          text: `[E] Trạm Phát Trăng (Thiếu ${3 - collectedIds.length}/3 linh kiện)`,
-          action: () => {
-            showAchievement({
-              id: 'server_offline',
-              title: 'SERVER OFFLINE (404)',
-              subtitle: `Cần tìm đủ 3 linh kiện: Ổ cắm, Súng bắn keo, Remote LED (${collectedIds.length}/3)`,
-            });
-          },
-        });
-      }
-      return;
-    }
-
-    // 6. Lanterns proximity check
+    // 4. Lanterns proximity check
     const lanternDistances = [
       {
         name: 'LỒNG ĐÈN SALONPAS',
@@ -595,6 +597,9 @@ export function Player() {
           <boxGeometry args={[0.14, 0.42, 0.15]} />
           <meshStandardMaterial color={isBeautyMode ? '#ec4899' : '#111827'} roughness={0.62} />
         </mesh>
+
+        {/* Personal photo lantern follows the player after workshop build */}
+        <PlayerLantern />
 
         {/* --- THE SIGNATURE BAMBOO POLE WITH HOOK TIP --- */}
         {hasBambooPole && (
