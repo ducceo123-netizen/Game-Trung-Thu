@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { UID_SOCIAL_POST_DATA_URL } from '../../assets/uidSocialPost';
 import { useSocialScreenStore } from '../../stores/useSocialScreenStore';
+import { useGameStore } from '../../stores/useGameStore';
 
 export const SOCIAL_POST_POSITION: [number, number, number] = [-2.2, 0, -5.6];
 
@@ -19,6 +20,7 @@ function loadTexture(source: string, onDone: (texture: THREE.Texture) => void) {
 export function SocialPostBoard() {
   const posts = useSocialScreenStore((s) => s.posts);
   const init = useSocialScreenStore((s) => s.init);
+  const openSocialPost = useGameStore((s) => s.openSocialPost);
   const [index, setIndex] = useState(0);
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
   const screenMat = useRef<THREE.MeshBasicMaterial>(null);
@@ -121,7 +123,7 @@ export function SocialPostBoard() {
         <meshStandardMaterial color="#171a1d" metalness={0.38} roughness={0.35} />
       </mesh>
 
-      <mesh position={[0, 1.68, 0.086]}>
+      <mesh position={[0, 1.68, 0.086]} onClick={(e)=>{e.stopPropagation();openSocialPost();}}>
         <planeGeometry args={[2.02, 2.43]} />
         <meshBasicMaterial
           ref={screenMat}
@@ -146,7 +148,7 @@ export function SocialPostBoard() {
           anchorY="middle"
           fontWeight="bold"
         >
-          UID SOCIAL SCREEN • BẤM E ĐỂ UP ẢNH
+          UID SOCIAL SCREEN • CLICK / E • UP ẢNH
         </Text>
         <Text
           position={[0, -0.09, 0.01]}
