@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { GamePhase, DialogueData, Achievement, QuestItem } from '../types/game';
 import { sounds } from '../utils/soundEffects';
 import { MULTIPLAYER_PLAYER_ID, MULTIPLAYER_ROOM_ID, supabase } from '../lib/supabase';
+import { broadcastCombatAttack, type CombatAttackPayload } from '../lib/multiplayerBus';
 
 export type LanternShapeMode = 'portrait' | 'wide' | 'generic';
 
@@ -41,7 +42,7 @@ const RANDOM_SYSTEM_MESSAGES = [
   'Workshop UID: up ảnh xong là có thể cầm lồng đèn đi chơi luôn.',
   'Nhấn F để bật/tắt lồng đèn cá nhân sau khi làm xong.',
   'Lầu 3 đang hơi... lạ. Nếu đèn chớp thì chạy nha.',
-  'Thỏ vẫn đang chiếm booth xanh để họp.',
+  'Booth xanh đang trống, thích thì vào núp nhưng đừng camp quá lâu.',
   'Team nào tìm thấy bánh nhớ hú, đừng âm thầm flex.',
   'Cầu thang lên Lầu 3 mở rồi. Gan thì lên.',
 ];
@@ -65,6 +66,14 @@ interface GameState {
   foundAllMooncakes: boolean;
   onlineConnected: boolean;
   onlinePlayerCount: number;
+
+  health: number;
+  maxHealth: number;
+  isDead: boolean;
+  respawnAt: number | null;
+  respawnNonce: number;
+  damageTick: number;
+  lanternAttackTrigger: number;
 
   isBeautyMode: boolean;
   isSlowed: boolean;
@@ -97,6 +106,11 @@ interface GameState {
   setPlayerTransform: (position: [number, number, number], rotationY: number) => void;
   setOnlineConnected: (connected: boolean) => void;
   setOnlinePlayerCount: (count: number) => void;
+
+  attackWithLantern: () => void;
+  receiveCombatAttack: (payload: CombatAttackPayload) => void;
+  applyDamage: (amount: number, attackerName: string) => void;
+  respawnPlayer: () => void;
 
   equipBambooPole: () => void;
   triggerBambooPoke: () => void;
@@ -161,6 +175,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   onlineConnected: false,
   onlinePlayerCount: 1,
 
+  health: 100,
+  maxHealth: 100,
+  isDead: false,
+  respawnAt: null,
+  respawnNonce: 0,
+  damageTick: 0,
+  lanternAttackTrigger: 0,
+
   isBeautyMode: false,
   isSlowed: false,
   sodiumLevel: 0,
@@ -205,6 +227,97 @@ export const useGameStore = create<GameState>((set, get) => ({
   setPlayerTransform: (position, rotationY) => set({ playerPosition: position, playerRotationY: rotationY }),
   setOnlineConnected: (connected) => set({ onlineConnected: connected }),
   setOnlinePlayerCount: (count) => set({ onlinePlayerCount: Math.max(1, count) }),
+
+  attackWithLantern: () => {
+    const state = get();
+    if (!state.personalLanternBuilt || state.isDead || state.workshopOpen || state.gamePhase !== 'playing') return;
+
+    const now = Date.now();
+    const lastAttackAt = (state as GameState & { __lastAttackAt?: number }).__lastAttackAt ?? 0;
+    if (now - lastAttackAt < 700) return;
+    (state as GameState & { __lastAttackAt?: number }).__lastAttackAt = now;
+
+    sounds.playBambooPoke();
+    set((s) => ({ lanternAttackTrigger: s.lanternAttackTrigger + 1 }));
+
+    broadcastCombatAttack({
+      id: `${MULTIPLAYER_PLAYER_ID}-${now}`,
+      attackerId: MULTIPLAYER_PLAYER_ID,
+      attackerName: state.playerName,
+      floor: state.currentFloor,
+      x: state.playerPosition[0],
+      y: state.playerPosition[1],
+      z: state.playerPosition[2],
+      rotationY: state.playerRotationY,
+      damage: 25,
+      createdAt: now,
+    });
+  },
+
+  receiveCombatAttack: (payload) => {
+    const state = get();
+    if (payload.attackerId === MULTIPLAYER_PLAYER_ID) return;
+    if (state.isDead || payload.floor !== state.currentFloor) return;
+    if (Date.now() - payload.createdAt > 1800) return;
+
+    const dx = state.playerPosition[0] - payload.x;
+    const dz = state.playerPosition[2] - payload.z;
+    const distance = Math.hypot(dx, dz);
+    if (distance > 1.85 || distance < 0.01) return;
+
+    const inv = 1 / distance;
+    const toTargetX = dx * inv;
+    const toTargetZ = dz * inv;
+    const forwardX = Math.sin(payload.rotationY);
+    const forwardZ = Math.cos(payload.rotationY);
+    const facingDot = forwardX * toTargetX + forwardZ * toTargetZ;
+
+    if (facingDot < 0.1) return;
+    get().applyDamage(payload.damage, payload.attackerName);
+  },
+
+  applyDamage: (amount, attackerName) => {
+    const state = get();
+    if (state.isDead) return;
+
+    const nextHealth = Math.max(0, state.health - Math.max(1, amount));
+    const dead = nextHealth <= 0;
+
+    set((s) => ({
+      health: nextHealth,
+      damageTick: s.damageTick + 1,
+      isDead: dead,
+      respawnAt: dead ? Date.now() + 60000 : s.respawnAt,
+      interactionPrompt: dead ? null : s.interactionPrompt,
+      booActive: dead ? false : s.booActive,
+      booWarning: dead ? false : s.booWarning,
+    }));
+
+    if (dead) {
+      sounds.playZap();
+      get().setTeamAnnouncement(`💥 ${attackerName} vừa hạ ${state.playerName} bằng lồng đèn!`);
+      window.setTimeout(() => {
+        if (get().isDead) get().respawnPlayer();
+      }, 60000);
+    } else {
+      sounds.playBlip(180);
+    }
+  },
+
+  respawnPlayer: () => {
+    set((s) => ({
+      health: s.maxHealth,
+      isDead: false,
+      respawnAt: null,
+      currentFloor: 2,
+      playerPosition: [0, 0.5, 14],
+      playerRotationY: Math.PI,
+      respawnNonce: s.respawnNonce + 1,
+      booActive: false,
+      booWarning: false,
+    }));
+    get().setTeamAnnouncement(`✨ ${get().playerName} đã hồi sinh ở Lầu 2.`);
+  },
 
   equipBambooPole: () => {
     sounds.playPickup();
