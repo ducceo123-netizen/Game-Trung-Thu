@@ -190,7 +190,27 @@
       }
     }
 
-    // 4. Anh Khoẻ — compliment once for 10 cakes
+    // 4. Dropped shop items — anyone can pick them up
+    for (const item of worldItems) {
+      if (item.floor !== currentFloor) continue;
+      const dist=playerPos.distanceTo(new THREE.Vector3(item.x,0.5,item.z));
+      if (dist < 1.8) {
+        setInteractionPrompt({
+          text: `📦 [E] Nhặt ${item.item_id === 'sword' ? 'Kiếm LED' : item.item_id === 'blaster' ? 'Blaster' : 'Xe điện mini'}`,
+          action: async () => {
+            const r=await claimWorldItem(item.id,playerName);
+            showAchievement({
+              id:`pickup_${item.id}`,
+              title:r.ok?'📦 NHẶT ĐƯỢC VẬT PHẨM':'KHÔNG NHẶT ĐƯỢC',
+              subtitle:r.ok?'Vật phẩm đã vào inventory. Ghé shop hoặc HUD để equip.':r.reason==='already_owned'?'Bạn đã có món này rồi.':'Có người khác vừa nhặt trước bạn.',
+            });
+          },
+        });
+        return;
+      }
+    }
+
+    // 5. Anh Khoẻ — compliment once for 10 cakes
     const khoeDist = playerPos.distanceTo(new THREE.Vector3(ANH_KHOE_POSITION[0], 0.5, ANH_KHOE_POSITION[2]));
     if (khoeDist < 2.3) {
       setInteractionPrompt({
@@ -207,7 +227,7 @@
       return;
     }
 
-    // 5. Item shop
+    // 6. Item shop
     const shopDist = playerPos.distanceTo(new THREE.Vector3(ITEM_SHOP_POSITION[0],0.5,ITEM_SHOP_POSITION[2]));
     if (shopDist < 2.8) {
       setInteractionPrompt({
@@ -217,7 +237,7 @@
       return;
     }
 
-    // 6. UID culture social post
+    // 7. UID culture social post
     const socialPostDist = playerPos.distanceTo(
       new THREE.Vector3(SOCIAL_POST_POSITION[0], 0.5, SOCIAL_POST_POSITION[2]),
     );
@@ -229,7 +249,7 @@
       return;
     }
 
-    // 7. Personal Lantern Workshop check (UID Floor 2)
+    // 8. Personal Lantern Workshop check (UID Floor 2)
     const workshopDist = playerPos.distanceTo(new THREE.Vector3(-5.4, 0.5, -9.7));
     if (workshopDist < 3.0) {
       setInteractionPrompt({
@@ -241,7 +261,7 @@
       return;
     }
 
-    // 8. Lanterns proximity check
+    // 9. Lanterns proximity check
     const lanternDistances = [
       {
         name: 'LỒNG ĐÈN SALONPAS',
