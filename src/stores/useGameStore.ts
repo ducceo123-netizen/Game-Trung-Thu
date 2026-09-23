@@ -449,8 +449,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   triggerBeerCanRabbit: () => {
     sounds.playJump();
-    set({ beerCanRabbitFled: true });
-    get().showAchievement({ id: 'rabbit_quit', title: 'CON THỎ ĐÃ BỎ VIỆC', subtitle: 'Nó out nhóm không chào ai.' });
+    set((state) => ({ beerCanRabbitFled: !state.beerCanRabbitFled }));
+    get().showAchievement({
+      id: 'beer_can_shake',
+      title: 'LON BIA PHÁT SÁNG',
+      subtitle: 'LED rung bần bật nhưng lon vẫn còn nguyên.',
+    });
   },
 
   launchWaterBottle: () => {
