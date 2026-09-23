@@ -7,6 +7,7 @@ export function LanternWorkshopModal() {
   const built = useGameStore((s) => s.personalLanternBuilt);
   const closeWorkshop = useGameStore((s) => s.closeWorkshop);
   const setImage = useGameStore((s) => s.setPersonalLanternImage);
+  const setShapeMode = useGameStore((s) => s.setPersonalLanternShapeMode);
   const build = useGameStore((s) => s.buildPersonalLantern);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -19,7 +20,17 @@ export function LanternWorkshopModal() {
 
     const reader = new FileReader();
     reader.onload = () => {
-      if (typeof reader.result === 'string') setImage(reader.result);
+      if (typeof reader.result !== 'string') return;
+      const dataUrl = reader.result;
+      const preview = new Image();
+      preview.onload = () => {
+        const ratio = preview.naturalWidth / Math.max(1, preview.naturalHeight);
+        if (ratio > 1.3) setShapeMode('wide');
+        else if (ratio < 0.78) setShapeMode('portrait');
+        else setShapeMode('generic');
+        setImage(dataUrl);
+      };
+      preview.src = dataUrl;
     };
     reader.readAsDataURL(file);
   };
@@ -28,7 +39,7 @@ export function LanternWorkshopModal() {
     <div className="absolute inset-0 z-[80] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 interactive-ui">
       <div className="w-full max-w-xl bg-[#d6d3c9] border-t-4 border-l-4 border-white border-b-4 border-r-4 border-slate-900 shadow-2xl font-mono text-slate-900">
         <div className="bg-[#8b1e1e] text-yellow-100 px-4 py-2 flex items-center justify-between border-b-2 border-slate-900">
-          <div className="font-black tracking-wide">🏮 QUẦY LÀM LỒNG ĐÈN — UID GÒ DẦU • LẦU 4</div>
+          <div className="font-black tracking-wide">🏮 QUẦY LÀM LỒNG ĐÈN — UID GÒ DẦU • LẦU 2</div>
           <button onClick={closeWorkshop} className="bg-[#c0c0c0] text-slate-900 border border-white px-2 cursor-pointer">✕</button>
         </div>
 
@@ -36,10 +47,10 @@ export function LanternWorkshopModal() {
           <div className="bg-yellow-100 border-2 border-amber-700 p-3 text-sm leading-relaxed">
             <div className="font-black mb-1">BẢNG HƯỚNG DẪN:</div>
             <div>1. Chọn một tấm ảnh bất kỳ trên máy.</div>
-            <div>2. Hệ thống sẽ biến ảnh thành mặt chính của một chiếc lồng đèn DIY.</div>
-            <div>3. Bấm <b>LÀM LỒNG ĐÈN</b>.</div>
-            <div>4. Đóng bảng, đi theo biển <b>KHU THẮP SÁNG →</b>.</div>
-            <div>5. Đứng trên bục showcase và bấm <b>E</b> để bật đèn.</div>
+            <div>2. Hệ thống đọc tỷ lệ ảnh để chọn shape dọc / ngang / vuông gần giống ảnh.</div>
+            <div>3. Bấm <b>LÀM LỒNG ĐÈN</b> — nhân vật sẽ cầm đèn theo luôn.</div>
+            <div>4. Nhấn <b>F</b> để bật / tắt đèn trong lúc đi vòng vòng.</div>
+            <div>5. Có thể mang đèn lên Lầu 3... nếu đủ gan.</div>
             <div className="mt-1 text-[11px] text-amber-900">Mẹo: ảnh chân dung, ảnh team hay meme nội bộ đều chơi được.</div>
           </div>
 
@@ -63,11 +74,11 @@ export function LanternWorkshopModal() {
               <div>
                 <div className="text-yellow-300 font-black mb-2">PREVIEW OUTPUT</div>
                 <div className="text-xs text-slate-300 leading-relaxed">
-                  Ảnh sẽ trở thành mặt chính của một lồng đèn carton DIY, có dây đỏ, tua rua và LED vàng quấn quanh theo đúng vibe đồ tự chế.
+                  Ảnh sẽ thành mặt chính của lồng đèn. Shape sẽ đổi theo tỷ lệ ảnh, kèm khung DIY, dây đỏ, tua rua và LED có thể bật sáng.
                 </div>
               </div>
               <div className="mt-4 text-xs text-cyan-300">
-                FLOW: WORKSHOP → KHU THẮP SÁNG
+                FLOW: UP ẢNH → CẦM ĐÈN → NHẤN F BẬT SÁNG
               </div>
             </div>
           </div>
