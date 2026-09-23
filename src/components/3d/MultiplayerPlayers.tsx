@@ -6,6 +6,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 import { MULTIPLAYER_PLAYER_ID, MULTIPLAYER_ROOM_ID, supabase } from '../../lib/supabase';
 import { setMultiplayerChannel, type CombatAttackPayload } from '../../lib/multiplayerBus';
 import { useGameStore, type LanternShapeMode } from '../../stores/useGameStore';
+import { useEconomyStore, type ShopItemId } from '../../stores/useEconomyStore';
 
 type RemotePlayerState = {
   id: string;
@@ -20,6 +21,7 @@ type RemotePlayerState = {
   lanternShape: LanternShapeMode;
   lanternImage: string | null;
   lanternText: string;
+  equippedItem: ShopItemId | null;
   health: number;
   isDead: boolean;
 };
@@ -118,6 +120,28 @@ function RemoteLantern({
   );
 }
 
+
+function RemoteEquipment({ item }: { item: ShopItemId | null }) {
+  if (!item) return null;
+  if (item === 'sword') return (
+    <group position={[0.42,0.62,0.18]} rotation={[0,0,-0.55]}>
+      <mesh position={[0,0.42,0]}><boxGeometry args={[0.055,0.85,0.055]}/><meshStandardMaterial color="#dbeafe" emissive="#60a5fa" emissiveIntensity={0.45} metalness={0.7}/></mesh>
+      <mesh><boxGeometry args={[0.28,0.07,0.08]}/><meshStandardMaterial color="#f59e0b"/></mesh>
+    </group>
+  );
+  if (item === 'blaster') return (
+    <group position={[0.46,0.7,0.22]}>
+      <mesh><boxGeometry args={[0.62,0.2,0.16]}/><meshStandardMaterial color="#111827" metalness={0.45}/></mesh>
+      <mesh position={[0.18,-0.2,0]} rotation={[0,0,-0.15]}><boxGeometry args={[0.14,0.34,0.13]}/><meshStandardMaterial color="#374151"/></mesh>
+    </group>
+  );
+  return (
+    <group position={[0,-0.02,0.04]}>
+      <mesh><boxGeometry args={[0.82,0.09,0.3]}/><meshStandardMaterial color="#0f766e"/></mesh>
+    </group>
+  );
+}
+
 function RemotePlayerAvatar({ player }: { player: RemotePlayerState }) {
   const group = useRef<THREE.Group>(null);
   const target = useRef(new THREE.Vector3(player.x, player.y, player.z));
@@ -202,6 +226,7 @@ function RemotePlayerAvatar({ player }: { player: RemotePlayerState }) {
         {player.lanternBuilt && !player.isDead && (
           <RemoteLantern imageData={player.lanternImage} lit={player.lanternLit} shape={player.lanternShape} text={player.lanternText} />
         )}
+        {!player.isDead && <RemoteEquipment item={player.equippedItem} />}
       </group>
 
       <group position={[0, 1.92, 0]}>
@@ -238,6 +263,7 @@ export function MultiplayerPlayers() {
   const lanternShape = useGameStore((s) => s.personalLanternShapeMode);
   const lanternImage = useGameStore((s) => s.personalLanternImage);
   const lanternText = useGameStore((s) => s.personalLanternText);
+  const equippedItem = useEconomyStore((s)=>s.equippedItem);
   const health = useGameStore((s) => s.health);
   const isDead = useGameStore((s) => s.isDead);
   const setOnlineConnected = useGameStore((s) => s.setOnlineConnected);
@@ -285,6 +311,7 @@ export function MultiplayerPlayers() {
           lanternShape: (meta.lanternShape as LanternShapeMode) ?? 'generic',
           lanternImage: typeof meta.lanternImage === 'string' ? meta.lanternImage : null,
           lanternText: typeof meta.lanternText === 'string' ? meta.lanternText : '',
+          equippedItem: (meta.equippedItem as ShopItemId) ?? null,
           health: Number(meta.health ?? 100),
           isDead: Boolean(meta.isDead),
         };
@@ -341,6 +368,7 @@ export function MultiplayerPlayers() {
           lanternShape: 'generic',
           lanternImage: null,
           lanternText: '',
+          equippedItem: null,
           health: 100,
           isDead: false,
         };
@@ -394,6 +422,7 @@ export function MultiplayerPlayers() {
           lanternShape: s.personalLanternShapeMode,
           lanternImage: s.personalLanternImage,
           lanternText: s.personalLanternText,
+          equippedItem: useEconomyStore.getState().equippedItem,
           health: s.health,
           isDead: s.isDead,
         });
@@ -456,6 +485,7 @@ export function MultiplayerPlayers() {
       lanternShape,
       lanternImage,
       lanternText,
+      equippedItem,
       health,
       isDead,
     };
@@ -469,7 +499,7 @@ export function MultiplayerPlayers() {
         ...meta,
       },
     });
-  }, [playerName, currentFloor, lanternBuilt, lanternLit, lanternShape, lanternImage, lanternText, health, isDead]);
+  }, [playerName, currentFloor, lanternBuilt, lanternLit, lanternShape, lanternImage, lanternText, equippedItem, health, isDead]);
 
   return (
     <>
