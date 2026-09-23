@@ -58,6 +58,14 @@ export function SocialPostBoard() {
   }, [source]);
 
   useEffect(() => {
+    const material = screenMat.current;
+    if (!material) return;
+    material.map = texture;
+    material.color.set(texture ? '#ffffff' : '#111827');
+    material.needsUpdate = true;
+  }, [texture]);
+
+  useEffect(() => {
     if (sources.length <= 1) return;
     const timer = window.setInterval(() => {
       if (transitioning.current) return;
@@ -132,6 +140,7 @@ export function SocialPostBoard() {
           transparent
           opacity={1}
           toneMapped={false}
+          side={THREE.DoubleSide}
         />
       </mesh>
 
