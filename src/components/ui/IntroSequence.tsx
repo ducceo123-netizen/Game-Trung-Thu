@@ -41,14 +41,14 @@ export function IntroSequence() {
   return (
     <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/95 text-white font-mono p-6 select-none">
       <div className="max-w-xl w-full text-center space-y-6">
-        {/* Step 0: 23:47 */}
+        {/* Step 0: 17:40 */}
         {step >= 0 && (
           <div className="animate-pulse">
             <span className="text-5xl sm:text-7xl font-bold tracking-widest text-red-500 font-mono">
               23:47
             </span>
             <p className="text-xs text-slate-500 mt-1 uppercase tracking-widest">
-              Đêm rằm tháng 8 · Lầu 4 Văn phòng UID Gò Dầu
+              Đêm rằm tháng 8 · Lầu 2 Văn phòng UID Gò Dầu
             </p>
           </div>
         )}
@@ -56,7 +56,7 @@ export function IntroSequence() {
         {/* Step 1: Có đứa vừa cắm nồi lẩu vào ổ điện */}
         {step >= 1 && (
           <div className="p-4 bg-red-950/40 border border-red-800 rounded-lg text-lg sm:text-xl font-semibold text-amber-200">
-            “Còn 20 phút nữa là tới giờ chấm lồng đèn.”
+            “BTC vừa giấu 3 bánh Trung Thu đặc biệt quanh Lầu 2.”
           </div>
         )}
 
@@ -64,10 +64,10 @@ export function IntroSequence() {
         {step >= 2 && (
           <div className="p-4 bg-slate-900 border-2 border-red-600 rounded-lg space-y-2">
             <div className="text-2xl sm:text-3xl font-bold text-red-400">
-              ⚠️ KHU THẮP SÁNG CHƯA SETUP XONG
+              ✈️ MỖI BÁNH CÓ 1 VÉ MÁY BAY NỘI ĐỊA
             </div>
             <p className="text-xs text-slate-400 font-mono">
-              BTC đang thiếu 3 món: ổ cắm • súng keo • remote LED
+              Giá trị mỗi vé: 3.000.000đ • tìm đủ 3 bánh nếu bạn đủ nhanh
             </p>
           </div>
         )}
@@ -76,10 +76,10 @@ export function IntroSequence() {
         {step >= 3 && (
           <div className="pt-4 space-y-6 animate-bounce">
             <div className="bg-yellow-400 text-slate-950 px-6 py-4 rounded-lg font-extrabold text-xl sm:text-2xl shadow-xl">
-              🏮 NHIỆM VỤ: CẢ LẦU 4 CÙNG LÊN ĐÈN 🏮
+              🏮 SĂN BÁNH • LÀM ĐÈN • NÉ BOO 👻
             </div>
             <p className="text-sm text-yellow-200">
-              Chia nhau tìm đồ setup, làm lồng đèn từ ảnh team, rồi mang ra sân khấu thắp sáng.
+              Tìm 3 bánh ở Lầu 2, up ảnh làm lồng đèn cầm đi chơi. Lầu 3 có Boo — thấy tín hiệu lạ thì chạy xuống.
             </p>
             <button
               onClick={handleSkipOrStart}
