@@ -35,17 +35,26 @@ export function PlayerEquipment() {
   );
 
   if(equipped==='blaster') return (
-    <group ref={gunRef} position={[0.46,0.7,0.22]}>
-      <mesh><boxGeometry args={[0.62,0.2,0.16]}/><meshStandardMaterial color="#111827" metalness={0.45} roughness={0.35}/></mesh>
-      <mesh position={[0.18,-0.2,0]} rotation={[0,0,-0.15]}><boxGeometry args={[0.14,0.34,0.13]}/><meshStandardMaterial color="#374151"/></mesh>
-      <mesh position={[-0.35,0,0]} rotation={[0,0,Math.PI/2]}><cylinderGeometry args={[0.05,0.05,0.25,8]} /><meshStandardMaterial color="#ef4444" emissive="#7f1d1d" emissiveIntensity={0.7}/></mesh>
-      <mesh ref={muzzleRef} visible={false} position={[-0.55,0,0]}>
-        <sphereGeometry args={[0.09,8,6]}/>
-        <meshBasicMaterial color="#fde68a"/>
+    <group ref={gunRef} position={[0.34,0.72,0.2]}>
+      <mesh>
+        <boxGeometry args={[0.18,0.2,0.72]}/>
+        <meshStandardMaterial color="#111827" metalness={0.45} roughness={0.35}/>
       </mesh>
-      <mesh ref={tracerRef} visible={false} position={[-2.2,0,0]} rotation={[0,0,Math.PI/2]}>
-        <cylinderGeometry args={[0.015,0.015,3.2,6]}/>
-        <meshBasicMaterial color="#fb7185" transparent opacity={0.8}/>
+      <mesh position={[0,-0.2,-0.02]} rotation={[-0.15,0,0]}>
+        <boxGeometry args={[0.14,0.34,0.16]}/>
+        <meshStandardMaterial color="#374151"/>
+      </mesh>
+      <mesh position={[0,0,0.48]} rotation={[Math.PI/2,0,0]}>
+        <cylinderGeometry args={[0.05,0.05,0.25,8]}/>
+        <meshStandardMaterial color="#ef4444" emissive="#7f1d1d" emissiveIntensity={0.7}/>
+      </mesh>
+      <mesh ref={muzzleRef} visible={false} position={[0,0,0.66]}>
+        <sphereGeometry args={[0.12,8,6]}/>
+        <meshBasicMaterial color="#fff7c2"/>
+      </mesh>
+      <mesh ref={tracerRef} visible={false} position={[0,0,2.55]} rotation={[Math.PI/2,0,0]}>
+        <cylinderGeometry args={[0.02,0.02,3.8,6]}/>
+        <meshBasicMaterial color="#fb7185" transparent opacity={0.9}/>
       </mesh>
     </group>
   );
