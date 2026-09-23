@@ -259,9 +259,9 @@ export function Player() {
       rotationY.current += angleDiff * Math.min(1, delta * 12);
     }
 
-    // Bounds check to keep inside alley & courtyard
-    pos.current.x = Math.max(-5.0, Math.min(5.0, pos.current.x));
-    pos.current.z = Math.max(-23.0, Math.min(15.5, pos.current.z));
+    // Bounds check for the wider UID Go Dau floor-4 layout
+    pos.current.x = Math.max(-8.8, Math.min(8.8, pos.current.x));
+    pos.current.z = Math.max(-22.8, Math.min(15.2, pos.current.z));
 
     // Jump & gravity
     if (keys.current.jump && isGrounded.current) {
@@ -385,29 +385,51 @@ export function Player() {
     }
     if (nearQuestItem) return;
 
-    // 3. Personal Lantern Workshop check (Lầu 4 - Văn phòng Gò Dầu)
-    const workshopDist = playerPos.distanceTo(new THREE.Vector3(-3.35, 0.5, -12.6));
+    // 3. Personal Lantern Workshop check (UID Floor 4)
+    const workshopDist = playerPos.distanceTo(new THREE.Vector3(-5.4, 0.5, -9.7));
     if (workshopDist < 3.0) {
+      setInteractionPrompt({
+        text: personalLanternBuilt
+          ? '📸 [E] Mở lại QUẦY LÀM LỒNG ĐÈN / đổi ảnh'
+          : '🏮 [E] Vào QUẦY LÀM LỒNG ĐÈN — Up ảnh của bạn',
+        action: () => openWorkshop(),
+      });
+      return;
+    }
+
+    // 4. Lighting Stage check — finished lantern must be brought here to light
+    const lightingStageDist = playerPos.distanceTo(new THREE.Vector3(5.5, 0.5, -14.0));
+    if (lightingStageDist < 3.2) {
       if (!personalLanternBuilt) {
         setInteractionPrompt({
-          text: '🏮 [E] Vào QUẦY LÀM LỒNG ĐÈN — Up ảnh của bạn',
-          action: () => openWorkshop(),
+          text: '🏮 [E] KHU THẮP SÁNG — Bạn chưa làm lồng đèn',
+          action: () =>
+            showAchievement({
+              id: 'need_personal_lantern',
+              title: 'CHƯA CÓ LỒNG ĐÈN',
+              subtitle: 'Đi theo bảng ← WORKSHOP UID, up ảnh và làm lồng đèn trước nha!',
+            }),
         });
       } else if (!personalLanternLit) {
         setInteractionPrompt({
-          text: '✨ [E] THẮP SÁNG lồng đèn vừa làm',
+          text: '✨ [E] THẮP SÁNG LỒNG ĐÈN CỦA BẠN',
           action: () => lightPersonalLantern(),
         });
       } else {
         setInteractionPrompt({
-          text: '📸 [E] Làm một lồng đèn khác từ ảnh mới',
-          action: () => openWorkshop(),
+          text: '✨ Lồng đèn của bạn đang sáng — [E] khoe thành quả',
+          action: () =>
+            showAchievement({
+              id: 'lantern_showcase',
+              title: 'UID MID-AUTUMN SHOWCASE',
+              subtitle: 'Đèn đã lên! Ảnh của bạn đang phát sáng ở Lầu 4 Gò Dầu ✨',
+            }),
         });
       }
       return;
     }
 
-    // 4. Moon Server Machine check (near [0, 0, -17.5])
+    // 5. Moon Server Machine check (near [0, 0, -17.5])
     const serverDist = playerPos.distanceTo(new THREE.Vector3(0, 0.5, -16.5));
     if (serverDist < 3.2) {
       if (collectedIds.length === 3) {
@@ -430,55 +452,55 @@ export function Player() {
       return;
     }
 
-    // 5. Lanterns proximity check
+    // 6. Lanterns proximity check
     const lanternDistances = [
       {
         name: 'LỒNG ĐÈN SALONPAS',
-        pos: [-2.8, 2.2, 10.5],
+        pos: [-3.1, 1.65, 6.0],
         action: applySalonpas,
         tip: '[E] Chữa lành cột sống',
       },
       {
-        name: 'LỒNG ĐÈN LON BIA SAIGON',
-        pos: [2.8, 2.3, 7.0],
+        name: 'LỒNG ĐÈN BIA + THỎ',
+        pos: [3.2, 1.7, 4.4],
         action: triggerBeerCan,
-        tip: '[E] Bắt thỏ ngồi trên lon bia',
+        tip: '[E] Chọc con thỏ ngồi trên lon bia',
       },
       {
-        name: 'LỒNG ĐÈN CHAI AQUAFINA',
-        pos: [-2.6, 2.2, 4.0],
+        name: 'LỒNG ĐÈN CHAI SATORI',
+        pos: [-2.6, 1.65, 1.5],
         action: launchBottle,
-        tip: '[E] Kích hoạt tên lửa nước',
+        tip: '[E] Kích hoạt chai nước tên lửa',
       },
       {
         name: 'LỒNG ĐÈN THÙNG CARTON',
-        pos: [2.7, 2.3, 1.2],
+        pos: [2.9, 1.65, -1.9],
         action: openBox,
-        tip: '[E] Mở nắp hộp FINAL_v7',
+        tip: '[E] Mở FINAL_FINAL_v7',
       },
       {
         name: 'LỒNG ĐÈN MÌ HẢO HẢO',
-        pos: [-2.8, 2.2, -1.8],
+        pos: [-2.7, 1.65, -4.7],
         action: eatNoodles,
-        tip: '[E] Húp mì nạp 12mg sodium',
+        tip: '[E] Húp mì cứu OT',
       },
       {
         name: 'LỒNG ĐÈN BÀN PHÍM RGB',
-        pos: [2.6, 2.4, -4.5],
+        pos: [4.6, 1.75, -7.1],
         action: triggerKeyboard,
         tip: '[E] Gõ phím ASDFGHJK',
       },
       {
-        name: 'LỒNG ĐÈN BEAUTY FILTER',
-        pos: [-3.2, 2.3, -7.5],
+        name: 'LỒNG ĐÈN SẮC ĐẸP',
+        pos: [-5.8, 1.75, -7.6],
         action: triggerBeauty,
-        tip: '[E] Bật filter 280%',
+        tip: '[E] Bật beauty filter 280%',
       },
       {
-        name: 'LỒNG ĐÈN MÁY IN CANON',
-        pos: [3.2, 2.2, -9.5],
+        name: 'LỒNG ĐÈN MÁY IN 2900',
+        pos: [4.4, 1.7, -9.8],
         action: printPaper,
-        tip: '[E] In lệnh duyệt deadline',
+        tip: '[E] In lệnh pls revise',
       },
     ];
 
@@ -496,8 +518,8 @@ export function Player() {
     }
     if (nearLantern) return;
 
-    // 6. Rabbit check (Hiding rabbit near [-4.0, 0.5, 11])
-    const rabbitDist = playerPos.distanceTo(new THREE.Vector3(-4.0, 0.5, 11));
+    // 7. Rabbit check — hiding inside the turquoise booth
+    const rabbitDist = playerPos.distanceTo(new THREE.Vector3(6.2, 0.5, 5.7));
     if (rabbitDist < 2.2) {
       setInteractionPrompt({
         text: '[E] Bắt chuyện với Thỏ Trốn Họp',
