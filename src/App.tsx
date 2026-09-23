@@ -19,6 +19,7 @@ import { SocialPostModal } from './components/ui/SocialPostModal';
 import { ItemShopModal } from './components/ui/ItemShopModal';
 import { CombatHitOverlay } from './components/ui/CombatHitOverlay';
 import { SocialChatModal } from './components/ui/SocialChatModal';
+import { WhiteboardModal } from './components/ui/WhiteboardModal';
 import { useGameStore } from './stores/useGameStore';
 
 export default function App() {
@@ -88,6 +89,7 @@ export default function App() {
       <ItemShopModal />
       <CombatHitOverlay />
       <SocialChatModal />
+      <WhiteboardModal />
 
       {/* Phase 1: Player Name Start Overlay */}
       {gamePhase === 'start_overlay' && <StartOverlay />}
