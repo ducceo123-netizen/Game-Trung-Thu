@@ -44,7 +44,7 @@ export function Player() {
   const togglePersonalLanternLight = useGameStore((s) => s.togglePersonalLanternLight);
   const currentFloor = useGameStore((s) => s.currentFloor);
   const setCurrentFloor = useGameStore((s) => s.setCurrentFloor);
-  const setPlayerPosition = useGameStore((s) => s.setPlayerPosition);
+  const setPlayerTransform = useGameStore((s) => s.setPlayerTransform);
   const questItems = useGameStore((s) => s.questItems);
   const collectedIds = useGameStore((s) => s.collectedItemIds);
   const collectItem = useGameStore((s) => s.collectItem);
@@ -330,7 +330,7 @@ export function Player() {
     const now = state.clock.elapsedTime;
     if (now - lastPositionSync.current > 0.12) {
       lastPositionSync.current = now;
-      setPlayerPosition([pos.current.x, pos.current.y, pos.current.z]);
+      setPlayerTransform([pos.current.x, pos.current.y, pos.current.z], rotationY.current);
     }
 
     // Bamboo pole poke swing animation
