@@ -59,7 +59,7 @@ export function RabbitMesh({ scale = [1, 1, 1] }: { scale?: [number, number, num
   );
 }
 
-// Security Guard NPC ("BẢO VỆ")
+// Security Guard NPC ("CHÚ BẢNH")
 export function SecurityGuardNPC({ position }: { position: [number, number, number] }) {
   const guardRef = useRef<THREE.Group>(null);
 
@@ -155,7 +155,7 @@ export function SecurityGuardNPC({ position }: { position: [number, number, numb
           anchorY="middle"
           fontWeight="bold"
         >
-          CHÚ BẢO VỆ
+          CHÚ BẢNH
         </Text>
         <Text
           position={[0, -0.1, 0.01]}
@@ -164,7 +164,7 @@ export function SecurityGuardNPC({ position }: { position: [number, number, numb
           anchorX="center"
           anchorY="middle"
         >
-          [Cựu chiến binh IT]
+          [Bảo vệ UID Gò Dầu]
         </Text>
       </group>
     </group>
