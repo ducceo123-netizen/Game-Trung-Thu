@@ -48,7 +48,7 @@ export function IntroSequence() {
               23:47
             </span>
             <p className="text-xs text-slate-500 mt-1 uppercase tracking-widest">
-              Đêm rằm tháng 8 · Lầu 2 Văn phòng UID Gò Dầu
+              Đêm rằm tháng 8 · Lầu 1 • Sảnh UID Gò Dầu
             </p>
           </div>
         )}
@@ -56,7 +56,7 @@ export function IntroSequence() {
         {/* Step 1: Có đứa vừa cắm nồi lẩu vào ổ điện */}
         {step >= 1 && (
           <div className="p-4 bg-red-950/40 border border-red-800 rounded-lg text-lg sm:text-xl font-semibold text-amber-200">
-            “BTC vừa giấu 3 bánh Trung Thu đặc biệt quanh Lầu 2.”
+            “Muốn lên Trung Thu Lầu 2 thì trước hết phải qua Chú Bảnh ở Lầu 1.”
           </div>
         )}
 
@@ -79,7 +79,7 @@ export function IntroSequence() {
               🏮 SĂN BÁNH • LÀM ĐÈN • NÉ BOO 👻
             </div>
             <p className="text-sm text-yellow-200">
-              Tìm 3 bánh ở Lầu 2, up ảnh làm lồng đèn cầm đi chơi. Lầu 3 có Boo — thấy tín hiệu lạ thì chạy xuống.
+              Gặp Chú Bảnh ở Lầu 1, lên Lầu 2 săn bánh / làm đèn / vẽ bảng / up Social Screen. Lầu 3 có Boo — thấy tín hiệu lạ thì chạy xuống.
             </p>
             <button
               onClick={handleSkipOrStart}
