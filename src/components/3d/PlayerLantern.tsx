@@ -13,6 +13,7 @@ export function PlayerLantern() {
   const carryRef = useRef<THREE.Group>(null);
   const swingRef = useRef<THREE.Group>(null);
   const attackProgress = useRef(0);
+  const trailRef = useRef<THREE.Mesh>(null);
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
   const attackTrigger = useGameStore((s) => s.lanternAttackTrigger);
 
@@ -53,6 +54,8 @@ export function PlayerLantern() {
       swingRef.current.rotation.z = Math.sin(t * 4.2) * 0.055;
       swingRef.current.rotation.x = Math.cos(t * 3.2) * 0.025;
     }
+
+    if (trailRef.current) trailRef.current.visible = attackProgress.current > 0;
 
     if (carryRef.current) {
       if (attackProgress.current > 0) {
@@ -136,12 +139,10 @@ export function PlayerLantern() {
           </group>
         )}
 
-        {attackProgress.current > 0 && (
-          <mesh position={[0.25,0,0]} rotation={[0,0,Math.PI/2]}>
-            <torusGeometry args={[0.72,0.035,6,18,Math.PI*0.75]} />
-            <meshBasicMaterial color="#fff3b0" transparent opacity={0.48} />
-          </mesh>
-        )}
+        <mesh ref={trailRef} visible={false} position={[0.25,0,0]} rotation={[0,0,Math.PI/2]}>
+          <torusGeometry args={[0.72,0.035,6,18,Math.PI*0.75]} />
+          <meshBasicMaterial color="#fff3b0" transparent opacity={0.48} />
+        </mesh>
 
         {/* simple LED frame */}
         {[
