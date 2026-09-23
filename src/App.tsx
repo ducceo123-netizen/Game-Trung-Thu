@@ -14,6 +14,7 @@ import { AchievementPopup } from './components/ui/AchievementPopup';
 import { EndingSequence } from './components/ui/EndingSequence';
 import { MobileControls } from './components/ui/MobileControls';
 import { LanternWorkshopModal } from './components/ui/LanternWorkshopModal';
+import { GameOverOverlay } from './components/ui/GameOverOverlay';
 import { useGameStore } from './stores/useGameStore';
 
 export default function App() {
@@ -62,10 +63,12 @@ export default function App() {
                   <span className="text-cyan-300">Nhảy</span>
                   <span>Phím E / Click:</span>
                   <span className="text-cyan-300">Tương tác</span>
-                  <span>Phím F / Click:</span>
-                  <span className="text-cyan-300">Chọc lồng đèn</span>
-                  <span>Kéo chuột:</span>
-                  <span className="text-cyan-300">Xoay camera</span>
+                  <span>Phím F:</span>
+                  <span className="text-cyan-300">Bật / tắt lồng đèn</span>
+                  <span>Click trái / J:</span>
+                  <span className="text-cyan-300">Đánh bằng lồng đèn</span>
+                  <span>Di chuột:</span>
+                  <span className="text-cyan-300">Xoay hướng realtime</span>
                 </div>
               </div>
             )}
@@ -74,6 +77,7 @@ export default function App() {
       )}
 
       <LanternWorkshopModal />
+      <GameOverOverlay />
 
       {/* Phase 1: Player Name Start Overlay */}
       {gamePhase === 'start_overlay' && <StartOverlay />}
