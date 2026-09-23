@@ -1,158 +1,70 @@
-import { useEffect, useState } from 'react';
 import { Text } from '@react-three/drei';
-import * as THREE from 'three';
 import { useGameStore } from '../../stores/useGameStore';
 
+export const WORKSHOP_POSITION: [number, number, number] = [-5.4, 0, -9.7];
+
 export function LanternWorkshop() {
-  const imageData = useGameStore((s) => s.personalLanternImage);
   const built = useGameStore((s) => s.personalLanternBuilt);
-  const lit = useGameStore((s) => s.personalLanternLit);
-  const [texture, setTexture] = useState<THREE.Texture | null>(null);
-
-  useEffect(() => {
-    if (!imageData) {
-      setTexture((old) => {
-        old?.dispose();
-        return null;
-      });
-      return;
-    }
-
-    let active = true;
-    const loader = new THREE.TextureLoader();
-    loader.load(imageData, (next) => {
-      if (!active) {
-        next.dispose();
-        return;
-      }
-      next.colorSpace = THREE.SRGBColorSpace;
-      next.minFilter = THREE.LinearFilter;
-      setTexture((old) => {
-        old?.dispose();
-        return next;
-      });
-    });
-
-    return () => {
-      active = false;
-    };
-  }, [imageData]);
 
   return (
-    <group position={[-3.35, 0, -12.6]}>
-      {/* Quầy làm lồng đèn */}
+    <group position={WORKSHOP_POSITION}>
       <mesh position={[0, 0.72, 0]} castShadow receiveShadow>
-        <boxGeometry args={[2.6, 0.12, 1.15]} />
-        <meshStandardMaterial color="#8b5a2b" roughness={0.88} />
+        <boxGeometry args={[3.0, 0.12, 1.25]} />
+        <meshStandardMaterial color="#c79b69" roughness={0.82} />
       </mesh>
-      {[-1.05, 1.05].map((x) => (
+      {[-1.2, 1.2].map((x) => (
         <mesh key={x} position={[x, 0.35, 0]} castShadow>
-          <boxGeometry args={[0.12, 0.7, 0.9]} />
-          <meshStandardMaterial color="#6b4423" roughness={0.9} />
+          <boxGeometry args={[0.1, 0.7, 1.0]} />
+          <meshStandardMaterial color="#ece9df" roughness={0.68} />
         </mesh>
       ))}
 
-      {/* Bảng chỉ dẫn tại quầy */}
-      <group position={[0, 2.35, 0]}>
+      <group position={[0, 2.18, 0.05]}>
         <mesh castShadow>
-          <boxGeometry args={[3.15, 0.95, 0.08]} />
-          <meshStandardMaterial color="#f7d154" roughness={0.72} />
+          <boxGeometry args={[3.45, 0.92, 0.08]} />
+          <meshStandardMaterial color="#1c5b72" roughness={0.68} />
         </mesh>
-        <Text position={[0, 0.16, 0.05]} fontSize={0.2} color="#541b10" anchorX="center" anchorY="middle" fontWeight="bold">
+        <Text position={[0, 0.16, 0.05]} fontSize={0.2} color="#fff6d6" anchorX="center" anchorY="middle" fontWeight="bold">
           QUẦY LÀM LỒNG ĐÈN
         </Text>
-        <Text position={[0, -0.18, 0.05]} fontSize={0.105} color="#7c2d12" anchorX="center" anchorY="middle">
-          ĐI TỚI GẦN • BẤM E • UP ẢNH CỦA BẠN
+        <Text position={[0, -0.15, 0.05]} fontSize={0.11} color="#d9f2f5" anchorX="center" anchorY="middle">
+          BẤM E • UP ẢNH • TỰ CHẾ MỘT CHIẾC
         </Text>
       </group>
 
-      {/* Vật liệu DIY trên bàn */}
-      <mesh position={[-0.85, 0.88, 0.1]} rotation={[0, 0.25, 0]}>
-        <boxGeometry args={[0.5, 0.12, 0.32]} />
-        <meshStandardMaterial color="#b45309" roughness={0.9} />
+      {/* messy workshop materials based on the event / office context */}
+      <mesh position={[-0.95, 0.86, 0.05]} rotation={[0, 0.25, 0]} castShadow>
+        <boxGeometry args={[0.55, 0.16, 0.4]} />
+        <meshStandardMaterial color="#a86f37" roughness={0.92} />
       </mesh>
-      <mesh position={[0.78, 0.93, 0.05]} rotation={[0, 0, -0.25]}>
-        <cylinderGeometry args={[0.05, 0.05, 0.62, 8]} />
-        <meshStandardMaterial color="#84a83d" roughness={0.8} />
+      <mesh position={[-0.28, 0.87, -0.08]} rotation={[0, 0, -0.95]}>
+        <cylinderGeometry args={[0.025, 0.025, 0.82, 8]} />
+        <meshStandardMaterial color="#a58e43" roughness={0.9} />
       </mesh>
-      <mesh position={[0.42, 0.88, -0.1]}>
-        <boxGeometry args={[0.38, 0.16, 0.28]} />
-        <meshStandardMaterial color="#dc2626" roughness={0.65} />
+      <group position={[0.38, 0.88, 0.03]}>
+        <mesh rotation={[0, 0, 0.8]}>
+          <boxGeometry args={[0.42, 0.12, 0.22]} />
+          <meshStandardMaterial color="#db4735" roughness={0.55} />
+        </mesh>
+        <mesh position={[0.26, 0.05, 0]} rotation={[0,0,0.8]}>
+          <cylinderGeometry args={[0.018,0.018,0.35,6]} />
+          <meshStandardMaterial color="#f2e7c9" roughness={0.6} />
+        </mesh>
+      </group>
+      <mesh position={[1.0, 0.88, 0.05]}>
+        <cylinderGeometry args={[0.18, 0.18, 0.24, 16]} />
+        <meshStandardMaterial color="#d9d6cf" roughness={0.45} />
       </mesh>
-
-      {/* Lồng đèn cá nhân xuất hiện sau khi làm xong */}
-      {built && (
-        <group position={[0, 1.55, -0.05]} rotation={[0, 0.08, -0.025]}>
-          {/* Dây treo */}
-          <mesh position={[0, 0.58, 0]}>
-            <cylinderGeometry args={[0.008, 0.008, 0.8, 5]} />
-            <meshStandardMaterial color="#b91c1c" roughness={0.9} />
-          </mesh>
-
-          {/* Thân lồng đèn dạng hộp carton DIY */}
-          <mesh castShadow>
-            <boxGeometry args={[1.05, 0.78, 0.22]} />
-            <meshStandardMaterial
-              color={lit ? '#f59e0b' : '#9a6a3a'}
-              emissive={lit ? '#ff9f1c' : '#000000'}
-              emissiveIntensity={lit ? 0.85 : 0}
-              roughness={0.82}
-            />
-          </mesh>
-
-          {/* Ảnh user làm mặt chính */}
-          <mesh position={[0, 0, 0.116]}>
-            <planeGeometry args={[0.88, 0.62]} />
-            {texture ? (
-              <meshStandardMaterial
-                map={texture}
-                emissive={lit ? '#ffffff' : '#000000'}
-                emissiveMap={lit ? texture : undefined}
-                emissiveIntensity={lit ? 0.45 : 0}
-                roughness={0.75}
-              />
-            ) : (
-              <meshStandardMaterial color="#f5e7c8" roughness={0.8} />
-            )}
-          </mesh>
-
-          {/* Dây LED quấn quanh */}
-          {Array.from({ length: 14 }).map((_, i) => {
-            const t = i / 14;
-            const a = t * Math.PI * 2;
-            const x = Math.cos(a) * 0.55;
-            const y = Math.sin(a) * 0.38;
-            return (
-              <mesh key={i} position={[x, y, 0.14]}>
-                <sphereGeometry args={[0.026, 6, 6]} />
-                <meshStandardMaterial
-                  color={lit ? '#fff1a8' : '#6b5a35'}
-                  emissive={lit ? '#ffc83d' : '#000000'}
-                  emissiveIntensity={lit ? 2.8 : 0}
-                />
-              </mesh>
-            );
-          })}
-
-          {/* Tua rua đỏ */}
-          <mesh position={[0, -0.62, 0]}>
-            <coneGeometry args={[0.08, 0.34, 8]} />
-            <meshStandardMaterial color="#dc2626" roughness={0.72} />
-          </mesh>
-
-          {lit && <pointLight color="#ffbf47" intensity={3.2} distance={5.5} decay={2} />}
-        </group>
-      )}
 
       <Text
-        position={[0, 0.18, 0.64]}
+        position={[0, 0.18, 0.68]}
         rotation={[-Math.PI / 2, 0, 0]}
-        fontSize={0.11}
-        color={built ? (lit ? '#fde68a' : '#fb923c') : '#e2e8f0'}
+        fontSize={0.105}
+        color={built ? '#156f75' : '#7c2d12'}
         anchorX="center"
         anchorY="middle"
       >
-        {built ? (lit ? '✨ ĐÃ THẮP SÁNG' : 'BẤM E ĐỂ THẮP SÁNG') : 'UP ẢNH → LÀM LỒNG ĐÈN'}
+        {built ? '✓ ĐÃ LÀM XONG • ĐI THEO BIỂN ĐẾN KHU THẮP SÁNG →' : '[E] MỞ QUẦY UP ẢNH'}
       </Text>
     </group>
   );
