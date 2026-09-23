@@ -42,13 +42,13 @@ export function StartOverlay() {
               </h1>
             </div>
             <p className="text-base sm:text-lg font-bold text-red-700 italic mt-1 font-mono">
-              “Lầu 4 chưa lên đèn thì chưa ai được về.”
+              “3 bánh • 3 vé máy bay • một Lầu 3 không nên lên một mình.”
             </p>
             <p className="text-xs text-slate-600 mt-2 font-mono">
               Phiên bản: Build 15.08.PROD (Hotfix lúc 23:45)
             </p>
             <p className="text-xs text-blue-800 mt-1 font-mono font-bold">
-              📍 ĐỊA ĐIỂM: LẦU 4 • VĂN PHÒNG GÒ DẦU
+              📍 ĐỊA ĐIỂM: LẦU 2 • VĂN PHÒNG GÒ DẦU
             </p>
           </div>
 
@@ -56,8 +56,8 @@ export function StartOverlay() {
           <div className="bg-white border-2 border-inset border-slate-600 p-3 text-xs leading-relaxed text-slate-800 mb-6 font-mono">
             <p className="font-bold text-red-600 mb-1">UID GÒ DẦU • HỘI THI LỒNG ĐÈN THỦ CÔNG:</p>
             <p>
-              Còn ít phút nữa tới giờ chấm lồng đèn. BTC vẫn thiếu đồ setup, các team đang chạy quanh Lầu 4 tìm ổ cắm, súng keo và remote LED.
-              Mỗi người có thể góp sức: tìm đồ, làm một lồng đèn từ ảnh team rồi mang ra khu showcase thắp sáng.
+              BTC đã giấu 3 bánh Trung Thu bí mật ở Lầu 2. Mỗi bánh chứa một vé máy bay nội địa trị giá 3.000.000đ.
+              Bạn có thể up ảnh làm lồng đèn riêng, cầm đi vòng vòng và bật sáng. Cầu thang lên Lầu 3 đã mở — nhưng Boo có thể xuất hiện bất kỳ lúc nào.
             </p>
           </div>
 
@@ -99,14 +99,14 @@ export function StartOverlay() {
                 type="submit"
                 className="w-full py-3 px-6 bg-red-700 hover:bg-red-800 text-yellow-300 font-bold font-mono text-lg tracking-widest border-t-2 border-l-2 border-red-400 border-b-2 border-r-2 border-red-950 shadow-lg active:translate-y-1 transition-transform cursor-pointer"
               >
-                🏮 ĐI CHƠI TRUNG THU 🏮
+                🌕 SĂN BÁNH & LÀM LỒNG ĐÈN 🏮
               </button>
             </div>
           </form>
 
           {/* Footer Controls summary */}
           <div className="mt-4 pt-3 border-t border-slate-400 text-center text-[11px] text-slate-600 font-mono">
-            Phím điều khiển: WASD di chuyển · Space nhảy · E tương tác · Shift chạy
+            WASD di chuyển · chuột xoay hướng · E tương tác · F bật/tắt lồng đèn · Shift chạy
           </div>
         </div>
       </div>
