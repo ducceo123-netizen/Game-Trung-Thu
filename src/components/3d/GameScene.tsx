@@ -5,7 +5,7 @@ import { Atmosphere } from './Atmosphere';
 import { Environment } from './Environment';
 import { DIYLanterns } from './DIYLanterns';
 import { QuestCollectibles } from './QuestCollectibles';
-import { SecurityGuardNPC, VacuumRidingRabbit, HidingRabbit } from './NPCs';
+import { SecurityGuardNPC } from './NPCs';
 import { Player } from './Player';
 import { LanternWorkshop } from './LanternWorkshop';
 import { Floor3Halloween } from './Floor3Halloween';
@@ -42,8 +42,6 @@ export function GameScene() {
                 <DIYLanterns />
                 <QuestCollectibles />
                 <SecurityGuardNPC position={[2.2, 0, 12]} />
-                <VacuumRidingRabbit />
-                <HidingRabbit position={[6.2, 0.5, 5.7]} />
                 <LanternWorkshop />
               </>
             ) : (
