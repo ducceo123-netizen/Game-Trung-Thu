@@ -9,6 +9,7 @@ import { SecurityGuardNPC, VacuumRidingRabbit, HidingRabbit } from './NPCs';
 import { MoonServer } from './MoonServer';
 import { Player } from './Player';
 import { LanternWorkshop } from './LanternWorkshop';
+import { LanternLightingStage } from './LanternLightingStage';
 import { useGameStore } from '../../stores/useGameStore';
 
 export function GameScene() {
@@ -30,14 +31,14 @@ export function GameScene() {
             {/* Ambient Base Light */}
             <ambientLight
               color={isBeautyMode ? '#f472b6' : '#1e293b'}
-              intensity={moonOnline ? 0.9 : 0.4}
+              intensity={moonOnline ? 1.0 : 0.72}
             />
 
             {/* Moon Directional Key Light */}
             <directionalLight
               position={[8, 22, -15]}
-              intensity={moonOnline ? 2.5 : 0.8}
-              color={moonOnline ? '#fffbeb' : '#38bdf8'}
+              intensity={moonOnline ? 2.2 : 1.15}
+              color={moonOnline ? '#fff7e6' : '#f3f4f6'}
               castShadow
               shadow-mapSize-width={1024}
               shadow-mapSize-height={1024}
@@ -49,11 +50,12 @@ export function GameScene() {
               shadow-camera-bottom={-20}
             />
 
-            {/* Secondary warm rim light for lanterns */}
+            {/* Neutral office fill + restrained warm lantern accent */}
+            <hemisphereLight args={['#f7f5ee', '#8b8c86', 0.95]} />
             <directionalLight
               position={[-10, 10, 10]}
-              intensity={0.5}
-              color="#f97316"
+              intensity={0.35}
+              color="#ffd6a1"
             />
 
             {/* 3D World Environment (Buildings, Corridors, Props, Signs) */}
@@ -74,6 +76,9 @@ export function GameScene() {
 
             {/* Walk-up workshop: upload a photo and turn it into a DIY lantern */}
             <LanternWorkshop />
+
+            {/* Dedicated presentation area where the finished lantern is lit */}
+            <LanternLightingStage />
 
             {/* The Moon & The Trạm Phát Trăng Machine */}
             <MoonServer />
