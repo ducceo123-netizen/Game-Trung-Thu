@@ -1,7 +1,29 @@
+import { useEffect, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 import { useEconomyStore } from '../../stores/useEconomyStore';
+import { useGameStore } from '../../stores/useGameStore';
 
 export function PlayerEquipment() {
   const equipped=useEconomyStore((s)=>s.equippedItem);
+  const attackTrigger=useGameStore((s)=>s.lanternAttackTrigger);
+  const gunRef=useRef<THREE.Group>(null);
+  const muzzleRef=useRef<THREE.Mesh>(null);
+  const tracerRef=useRef<THREE.Mesh>(null);
+  const recoil=useRef(0);
+
+  useEffect(()=>{
+    if(equipped==='blaster' && attackTrigger>0) recoil.current=1;
+  },[attackTrigger,equipped]);
+
+  useFrame((_,delta)=>{
+    recoil.current=Math.max(0,recoil.current-delta*9);
+    const kick=Math.sin(recoil.current*Math.PI)*0.12;
+    if(gunRef.current) gunRef.current.position.z=0.22-kick;
+    if(muzzleRef.current) muzzleRef.current.visible=recoil.current>0.45;
+    if(tracerRef.current) tracerRef.current.visible=recoil.current>0.62;
+  });
+
   if(!equipped) return null;
 
   if(equipped==='sword') return (
@@ -13,10 +35,18 @@ export function PlayerEquipment() {
   );
 
   if(equipped==='blaster') return (
-    <group position={[0.46,0.7,0.22]}>
+    <group ref={gunRef} position={[0.46,0.7,0.22]}>
       <mesh><boxGeometry args={[0.62,0.2,0.16]}/><meshStandardMaterial color="#111827" metalness={0.45} roughness={0.35}/></mesh>
       <mesh position={[0.18,-0.2,0]} rotation={[0,0,-0.15]}><boxGeometry args={[0.14,0.34,0.13]}/><meshStandardMaterial color="#374151"/></mesh>
-      <mesh position={[-0.35,0,0]}><cylinderGeometry args={[0.05,0.05,0.25,8]} /><meshStandardMaterial color="#ef4444" emissive="#7f1d1d" emissiveIntensity={0.7}/></mesh>
+      <mesh position={[-0.35,0,0]} rotation={[0,0,Math.PI/2]}><cylinderGeometry args={[0.05,0.05,0.25,8]} /><meshStandardMaterial color="#ef4444" emissive="#7f1d1d" emissiveIntensity={0.7}/></mesh>
+      <mesh ref={muzzleRef} visible={false} position={[-0.55,0,0]}>
+        <sphereGeometry args={[0.09,8,6]}/>
+        <meshBasicMaterial color="#fde68a"/>
+      </mesh>
+      <mesh ref={tracerRef} visible={false} position={[-2.2,0,0]} rotation={[0,0,Math.PI/2]}>
+        <cylinderGeometry args={[0.015,0.015,3.2,6]}/>
+        <meshBasicMaterial color="#fb7185" transparent opacity={0.8}/>
+      </mesh>
     </group>
   );
 
