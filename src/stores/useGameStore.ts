@@ -154,6 +154,7 @@ let achievementTimer: ReturnType<typeof setTimeout> | null = null;
 let beautyTimer: ReturnType<typeof setTimeout> | null = null;
 let slowTimer: ReturnType<typeof setTimeout> | null = null;
 let announcementTimer: ReturnType<typeof setTimeout> | null = null;
+let lastLanternAttackAt = 0;
 
 export const useGameStore = create<GameState>((set, get) => ({
   playerName: 'UID Player',
@@ -233,9 +234,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (!state.personalLanternBuilt || state.isDead || state.workshopOpen || state.gamePhase !== 'playing') return;
 
     const now = Date.now();
-    const lastAttackAt = (state as GameState & { __lastAttackAt?: number }).__lastAttackAt ?? 0;
-    if (now - lastAttackAt < 700) return;
-    (state as GameState & { __lastAttackAt?: number }).__lastAttackAt = now;
+    if (now - lastLanternAttackAt < 700) return;
+    lastLanternAttackAt = now;
 
     sounds.playBambooPoke();
     set((s) => ({ lanternAttackTrigger: s.lanternAttackTrigger + 1 }));
