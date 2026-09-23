@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../../stores/useGameStore';
 import { sounds } from '../../utils/soundEffects';
+import { useEconomyStore } from '../../stores/useEconomyStore';
 
 export function RetroHUD() {
   const collectedIds = useGameStore((s) => s.collectedItemIds);
@@ -18,6 +19,8 @@ export function RetroHUD() {
   const sodiumLevel = useGameStore((s) => s.sodiumLevel);
   const onlineConnected = useGameStore((s) => s.onlineConnected);
   const onlinePlayerCount = useGameStore((s) => s.onlinePlayerCount);
+  const mooncakeBalance = useEconomyStore((s)=>s.balance);
+  const equippedItem = useEconomyStore((s)=>s.equippedItem);
   const health = useGameStore((s) => s.health);
   const maxHealth = useGameStore((s) => s.maxHealth);
   const isDead = useGameStore((s) => s.isDead);
@@ -59,6 +62,11 @@ export function RetroHUD() {
                 🏆 ĐÃ TÌM ĐỦ 3 BÁNH!
               </div>
             )}
+          </div>
+
+          <div className="bg-amber-950/90 border border-amber-500 px-2.5 py-1.5 rounded text-[11px] font-mono text-amber-100 max-w-xs">
+            <div className="font-black text-yellow-300">🌕 VÍ BÁNH: {mooncakeBalance}</div>
+            <div>{equippedItem ? `Đang equip: ${equippedItem}` : 'Chưa equip vật phẩm'}</div>
           </div>
 
           <div className="bg-slate-950/85 border border-cyan-700/60 px-2.5 py-1.5 rounded text-[11px] font-mono text-cyan-100 max-w-xs">
