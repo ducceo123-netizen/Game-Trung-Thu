@@ -17,7 +17,7 @@ export type CombatAttackPayload = {
   id: string;
   attackerId: string;
   attackerName: string;
-  floor: 2 | 3;
+  floor: 1 | 2 | 3;
   x: number;
   y: number;
   z: number;
