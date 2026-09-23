@@ -65,8 +65,6 @@ export function Player() {
   const rotationY = useRef(Math.PI); // Facing inward (toward alley)
   const cameraYaw = useRef(Math.PI);
   const cameraPitch = useRef(0.28);
-  const isPointerDown = useRef(false);
-  const lastMousePos = useRef({ x: 0, y: 0 });
 
   const keys = useRef<KeysState>({
     forward: false,
@@ -149,45 +147,41 @@ export function Player() {
       }
     };
 
-    // Mouse drag for camera orbit
-    const handleMouseDown = (e: MouseEvent) => {
-      // If clicking directly on UI, don't drag camera
+    // Free-look mouse controls: moving the mouse rotates view immediately.
+    // No click-and-drag required. UI surfaces remain excluded.
+    const handleMouseMove = (e: MouseEvent) => {
+      if (useGameStore.getState().gamePhase !== 'playing') return;
+      if (useGameStore.getState().workshopOpen) return;
       if ((e.target as HTMLElement).closest('.interactive-ui')) return;
-      isPointerDown.current = true;
-      lastMousePos.current = { x: e.clientX, y: e.clientY };
 
-      // Left click also pokes bamboo pole if playing
+      const dx = e.movementX;
+      const dy = e.movementY;
+
+      cameraYaw.current -= dx * 0.0042;
+      cameraPitch.current = Math.max(
+        0.08,
+        Math.min(0.95, cameraPitch.current + dy * 0.0032),
+      );
+    };
+
+    // Left click keeps the existing bamboo poke action.
+    const handleMouseDown = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest('.interactive-ui')) return;
       if (e.button === 0 && hasBambooPole) {
         triggerBambooPoke();
       }
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isPointerDown.current) return;
-      const dx = e.clientX - lastMousePos.current.x;
-      const dy = e.clientY - lastMousePos.current.y;
-      lastMousePos.current = { x: e.clientX, y: e.clientY };
-
-      cameraYaw.current -= dx * 0.005;
-      cameraPitch.current = Math.max(0.05, Math.min(1.2, cameraPitch.current + dy * 0.004));
-    };
-
-    const handleMouseUp = () => {
-      isPointerDown.current = false;
-    };
-
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousedown', handleMouseDown);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousedown', handleMouseDown);
     };
   }, [hasBambooPole, triggerBambooPoke]);
 
@@ -250,14 +244,15 @@ export function Player() {
       pos.current.x += dir.x * moveSpeed * delta;
       pos.current.z += dir.z * moveSpeed * delta;
 
-      // Rotate player toward movement direction
-      const targetAngle = Math.atan2(dir.x, dir.z);
-      // Smooth angular interpolation
-      let angleDiff = targetAngle - rotationY.current;
-      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-      rotationY.current += angleDiff * Math.min(1, delta * 12);
     }
+
+    // Character faces the mouse/camera direction in real time, even while idle.
+    // This gives action-game controls: W/S move along facing direction, A/D strafe.
+    const targetFacing = cameraYaw.current;
+    let facingDiff = targetFacing - rotationY.current;
+    while (facingDiff > Math.PI) facingDiff -= Math.PI * 2;
+    while (facingDiff < -Math.PI) facingDiff += Math.PI * 2;
+    rotationY.current += facingDiff * Math.min(1, delta * 18);
 
     // Bounds check for the wider UID Go Dau floor-4 layout
     pos.current.x = Math.max(-8.8, Math.min(8.8, pos.current.x));
