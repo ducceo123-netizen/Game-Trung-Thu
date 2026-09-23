@@ -354,7 +354,7 @@ export function Environment() {
           anchorX="center"
           anchorY="middle"
         >
-          Hội Thi Lồng Đèn Ve Chai Công Sở • Nghiêm Cấm Cắm Nồi Lẩu
+          ĐỊA ĐIỂM: LẦU 4 • VĂN PHÒNG GÒ DẦU
         </Text>
       </group>
 
@@ -424,6 +424,29 @@ export function Environment() {
         rotation={[0, -Math.PI / 2, 0]}
         bgColor="#0369a1"
         textColor="#bae6fd"
+      />
+
+      {/* --- DIRECTION SIGNS TO THE PERSONAL LANTERN WORKSHOP --- */}
+      <OfficeSign
+        text="🏮 QUẦY LÀM LỒNG ĐÈN  ↓  ĐI THẲNG"
+        position={[4.8, 2.55, 9.2]}
+        rotation={[0, -Math.PI / 2, 0]}
+        bgColor="#92400e"
+        textColor="#fde68a"
+      />
+      <OfficeSign
+        text="📸 UP ẢNH LÀM LỒNG ĐÈN  ↓"
+        position={[-4.8, 2.55, 2.0]}
+        rotation={[0, Math.PI / 2, 0]}
+        bgColor="#7c2d12"
+        textColor="#fef3c7"
+      />
+      <OfficeSign
+        text="← QUẦY LÀM LỒNG ĐÈN • LẦU 4"
+        position={[4.8, 2.55, -6.8]}
+        rotation={[0, -Math.PI / 2, 0]}
+        bgColor="#854d0e"
+        textColor="#fef08a"
       />
 
       {/* --- FAIRY LIGHT STRINGS ZIG-ZAGGING OVERHEAD --- */}
