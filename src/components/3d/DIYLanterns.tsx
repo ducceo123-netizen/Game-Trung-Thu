@@ -55,10 +55,29 @@ function BaseHangingLantern({
 
   return (
     <group ref={groupRef} position={position}>
-      {/* Hanging rope from ceiling / wire */}
-      <mesh position={[0, 0.75, 0]}>
-        <cylinderGeometry args={[0.008, 0.008, 1.5, 4]} />
-        <meshBasicMaterial color="#64748b" />
+      {/* DIY carrying rig inspired by real handmade Mid-Autumn lanterns:
+          bamboo stick -> cheap yellow hook -> red cord -> improvised payload */}
+      <group position={[-0.48, 1.25, 0.02]} rotation={[0, 0, -0.58]}>
+        <mesh position={[0, 0.42, 0]} castShadow>
+          <cylinderGeometry args={[0.018, 0.024, 1.45, 8]} />
+          <meshStandardMaterial color="#9a7b36" roughness={0.9} />
+        </mesh>
+        {[0.02, 0.38, 0.74].map((y, i) => (
+          <mesh key={i} position={[0, y, 0]}>
+            <torusGeometry args={[0.026, 0.004, 6, 10]} />
+            <meshStandardMaterial color="#6f5b2b" roughness={1} />
+          </mesh>
+        ))}
+        <mesh position={[0.03, 1.16, 0]} rotation={[Math.PI / 2, 0, 0.2]}>
+          <torusGeometry args={[0.055, 0.012, 6, 12, Math.PI * 1.45]} />
+          <meshStandardMaterial color="#f4c430" roughness={0.45} />
+        </mesh>
+      </group>
+
+      {/* Visible red hanging cord, deliberately simple and handmade */}
+      <mesh position={[0, 0.73, 0]}>
+        <cylinderGeometry args={[0.007, 0.007, 1.46, 5]} />
+        <meshStandardMaterial color="#b91c1c" roughness={0.95} />
       </mesh>
 
       {/* Main swinging payload */}
@@ -111,19 +130,19 @@ export function SalonpasLantern({ position }: { position: [number, number, numbe
       onInteract={applyHealing}
     >
       <group>
-        {/* Salonpas Box */}
-        <mesh castShadow>
-          <boxGeometry args={[0.65, 0.9, 0.28]} />
-          <meshStandardMaterial color="#059669" roughness={0.4} />
+        {/* Literal improvised medicine-package body: wide cardboard box, not a fantasy lantern */}
+        <mesh castShadow rotation={[0.02, -0.04, -0.025]}>
+          <boxGeometry args={[0.98, 0.58, 0.3]} />
+          <meshStandardMaterial color="#0f9f70" roughness={0.78} />
         </mesh>
-        {/* White front panel */}
-        <mesh position={[0, 0, 0.145]}>
-          <planeGeometry args={[0.58, 0.8]} />
-          <meshStandardMaterial color="#f8fafc" roughness={0.3} />
+        {/* Slightly imperfect white printed front label */}
+        <mesh position={[0, 0, 0.156]} rotation={[0, 0, -0.015]}>
+          <planeGeometry args={[0.9, 0.5]} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.7} />
         </mesh>
-        {/* Blue Salonpas swoosh banner */}
-        <mesh position={[0, 0.12, 0.148]}>
-          <planeGeometry args={[0.54, 0.26]} />
+        {/* Blue Salonpas brand band */}
+        <mesh position={[0, 0.08, 0.162]} rotation={[0, 0, 0.01]}>
+          <planeGeometry args={[0.82, 0.19]} />
           <meshBasicMaterial color="#1d4ed8" />
         </mesh>
         <Text
@@ -146,11 +165,20 @@ export function SalonpasLantern({ position }: { position: [number, number, numbe
           TRỊ ĐAU LƯNG DEADLINE
         </Text>
 
-        {/* Wrapped fairy light wire ring */}
-        <mesh rotation={[0.2, 0.3, 0]}>
-          <torusGeometry args={[0.45, 0.02, 8, 24]} />
-          <meshStandardMaterial color="#facc15" emissive="#facc15" emissiveIntensity={0.8} />
+        {/* Cheap warm fairy-light wire visibly wrapped around the real package */}
+        <mesh rotation={[0.25, 0.45, 0.08]}>
+          <torusGeometry args={[0.48, 0.008, 6, 28]} />
+          <meshStandardMaterial color="#6b4f2a" roughness={0.9} />
         </mesh>
+        {Array.from({ length: 10 }).map((_, i) => {
+          const a = (i / 10) * Math.PI * 2;
+          return (
+            <mesh key={i} position={[Math.cos(a) * 0.48, Math.sin(a) * 0.28, 0.18 + Math.sin(a * 2) * 0.04]}>
+              <sphereGeometry args={[0.025, 6, 6]} />
+              <meshStandardMaterial color="#ffe9a8" emissive="#ffc94a" emissiveIntensity={2.2} roughness={0.25} />
+            </mesh>
+          );
+        })}
 
         {/* Red tassel underneath (Chùm tua rua đỏ) */}
         <group position={[0, -0.6, 0]}>
