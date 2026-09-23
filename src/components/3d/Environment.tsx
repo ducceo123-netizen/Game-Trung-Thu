@@ -297,16 +297,28 @@ function WorkspaceArea() {
 function WorkshopArea() {
   return (
     <group position={[-5.4, 0, -9.4]}>
-      <mesh position={[0, 2.25, 1.85]} castShadow>
-        <boxGeometry args={[7.0, 4.5, 0.16]} />
-        <meshStandardMaterial color={WALL} roughness={0.92} />
+      {/* Open workshop: no blocking wall, visible directly from the main aisle */}
+      <TVStand position={[-2.0, 0, 1.05]} rotation={[0, 0.18, 0]} label="UID WORKSHOP" />
+      <Whiteboard position={[2.15, 0, 1.0]} rotation={[0, -0.12, 0]} />
+      <RoundedSign text="🏮 QUẦY LÀM LỒNG ĐÈN • BẤM E" position={[0, 3.45, 0.9]} width={5.3} bg="#b45309" fg="#fff7d6" fontSize={0.18} />
+
+      <mesh position={[0, 0.018, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[2.4, 2.75, 32]} />
+        <meshBasicMaterial color="#f59e0b" transparent opacity={0.42} />
       </mesh>
-      <TVStand position={[-1.35, 0, 1.3]} label="UID WORKSHOP" />
-      <Whiteboard position={[1.7, 0, 1.28]} />
-      <RoundedSign text="QUẦY LÀM LỒNG ĐÈN • BẤM E" position={[0.2, 3.55, 1.6]} width={4.9} bg="#1d596f" fg="#f7f1d5" fontSize={0.17} />
-      {[-2.3, -1.4, -0.5, 0.4, 1.3, 2.2].map((x, i) => (
-        <SimpleChair key={x} position={[x, 0, -0.5 - (i % 2) * 0.72]} rotation={[0, Math.PI, 0]} />
+
+      {[-1.75, 1.75].map((x) => (
+        <SimpleChair key={x} position={[x, 0, -1.35]} rotation={[0, Math.PI, 0]} />
       ))}
+
+      <mesh position={[-2.65, 2.55, 0.55]}>
+        <sphereGeometry args={[0.1, 8, 8]} />
+        <meshStandardMaterial color="#fff0a8" emissive="#f59e0b" emissiveIntensity={1.5} />
+      </mesh>
+      <mesh position={[2.65, 2.55, 0.55]}>
+        <sphereGeometry args={[0.1, 8, 8]} />
+        <meshStandardMaterial color="#fff0a8" emissive="#f59e0b" emissiveIntensity={1.5} />
+      </mesh>
     </group>
   );
 }
@@ -365,7 +377,7 @@ function BoothArea() {
         <boxGeometry args={[0.08, 0.56, 0.08]} />
         <meshStandardMaterial color="#242424" roughness={0.45} />
       </mesh>
-      <RoundedSign text="THỎ ĐANG HỌP • ĐỪNG GÕ CỬA" position={[0, 3.55, 0]} width={3.3} bg="#11727a" fg="#f7f2dd" fontSize={0.12} />
+      <RoundedSign text="MEETING BOOTH • GIỮ YÊN LẶNG" position={[0, 3.55, 0]} width={3.3} bg="#11727a" fg="#f7f2dd" fontSize={0.12} />
     </group>
   );
 }
