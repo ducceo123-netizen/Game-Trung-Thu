@@ -13,6 +13,7 @@ import { BooGhost } from './BooGhost';
 import { MultiplayerPlayers } from './MultiplayerPlayers';
 import { SocialPostBoard } from './SocialPostBoard';
 import { WorldMooncakes } from './WorldMooncakes';
+import { WorldItems } from './WorldItems';
 import { ItemShop } from './ItemShop';
 import { AnhKhoeNPC } from './AnhKhoeNPC';
 import { useGameStore } from '../../stores/useGameStore';
@@ -60,6 +61,7 @@ export function GameScene() {
 
             {/* Shared currency drops can exist on either floor */}
             <WorldMooncakes />
+            <WorldItems />
 
             {/* Realtime remote players + local player persist while changing floors */}
             <MultiplayerPlayers />
