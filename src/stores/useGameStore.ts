@@ -7,7 +7,7 @@ export const INITIAL_QUEST_ITEMS: QuestItem[] = [
     id: 'extension_cord',
     name: 'Ổ cắm điện Lioa 10m',
     vietnameseName: 'Ổ CẮM LIOA DÂY CAM',
-    description: 'Chống cháy nổ tạm thời, quấn băng keo đen 3 vòng.',
+    description: 'Ổ điện cho khu showcase. Team nào thấy trước thì hú nhau lại lấy.',
     position: [6.5, 0.45, 9.5],
     color: '#ff6600',
     collected: false,
@@ -16,7 +16,7 @@ export const INITIAL_QUEST_ITEMS: QuestItem[] = [
     id: 'glue_gun',
     name: 'Súng bắn keo silicon 60W',
     vietnameseName: 'SÚNG BẮN KEO CÔNG SỞ',
-    description: 'Nóng chảy mọi linh kiện, dính liền mọi rạn nứt deadline.',
+    description: 'Thiếu món này thì lồng đèn chỉ còn cách dán bằng niềm tin.',
     position: [-6.8, 0.5, -1.5],
     color: '#00e5ff',
     collected: false,
@@ -25,7 +25,7 @@ export const INITIAL_QUEST_ITEMS: QuestItem[] = [
     id: 'led_controller',
     name: 'Remote điều khiển LED RGB',
     vietnameseName: 'REMOTE LED TÀU 12 NÚT',
-    description: 'Bấm nút "STROBE" để tạo ảo giác tiệc tùng công ty.',
+    description: 'Remote để đồng bộ LED cho khu thắp sáng của cả Lầu 4.',
     position: [4.8, 0.65, -8.5],
     color: '#ff00aa',
     collected: false,
@@ -33,16 +33,16 @@ export const INITIAL_QUEST_ITEMS: QuestItem[] = [
 ];
 
 const RANDOM_SYSTEM_MESSAGES = [
-  'Chị Hằng đang reconnect...',
-  'Đồng bộ ánh trăng thất bại. Mã lỗi: ERR_NO_LAU_ALLOWED',
-  'Hot glue gun temperature: 185°C (Nguy hiểm)',
-  'Design đang chờ Sếp approve lần 8...',
-  'Đang tải Trung Thu... 99% (Stuck)',
-  'Không tìm thấy file final_final_REAL.psd',
-  'Thông báo: Ai rút phích cắm nồi lẩu xin vui lòng nhận lỗi',
-  'Server Mặt Trăng: 404 Moon Not Found',
-  'Chú Cuội đang kẹt trên xe ôm công nghệ',
-  'Team QA: Tính năng "Trăng Rằm" chưa được test trên Production!',
+  'BTC: Team nào thấy remote LED thì hú lên nha!',
+  'Workshop UID đang đông, xếp hàng văn minh nhưng nhanh chân giùm.',
+  'Hot glue gun temperature: 185°C (Đừng dí vô tay đồng đội)',
+  'Team Design hỏi ai giữ file final_final_REAL.psd?',
+  'Khu thắp sáng: còn chờ lồng đèn của các team mang qua.',
+  'Ai cầm ổ cắm Lioa nhớ đem xuống stage giùm.',
+  'Reminder: làm xong nhớ chụp hình chung với lồng đèn.',
+  'Team nào hoàn thành trước được quyền flex trước.',
+  'Thỏ đang chiếm booth xanh để họp, đừng kỳ vọng nó hỗ trợ.',
+  'QA: tính năng teamwork đang được test trực tiếp bằng con người thật.',
 ];
 
 interface GameState {
@@ -152,8 +152,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ hasBambooPole: true });
     get().showAchievement({
       id: 'bamboo_pole',
-      title: 'VŨ KHÍ THƯỢNG HẠNG',
-      subtitle: 'Đã nhận Cây Tre Huyền Thoại (Còn đúng 1 cây)',
+      title: 'ĐỒ NGHỀ BTC',
+      subtitle: 'Đã nhận cây tre của BTC — đem đi khều đồ và chọc lồng đèn.'
     });
   },
 
@@ -220,8 +220,8 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     showAchievement({
       id: `collect_${itemId}`,
-      title: `LINH KIỆN TRUNG THU (${updatedIds.length}/3)`,
-      subtitle: item ? `Nhặt được: ${item.vietnameseName}` : 'Đã nhặt linh kiện!',
+      title: `ĐỒ SETUP SÂN KHẤU (${updatedIds.length}/3)`
+      subtitle: item ? `Team vừa kiếm được: ${item.vietnameseName}` : 'Đã kiếm được đồ setup!',
     });
   },
 
