@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { MULTIPLAYER_PLAYER_ID, MULTIPLAYER_ROOM_ID, supabase } from '../../lib/supabase';
+import { setMultiplayerChannel, type CombatAttackPayload } from '../../lib/multiplayerBus';
 import { useGameStore, type LanternShapeMode } from '../../stores/useGameStore';
 
 type RemotePlayerState = {
@@ -18,6 +19,8 @@ type RemotePlayerState = {
   lanternLit: boolean;
   lanternShape: LanternShapeMode;
   lanternImage: string | null;
+  health: number;
+  isDead: boolean;
 };
 
 function RemoteLantern({
@@ -124,75 +127,94 @@ function RemotePlayerAvatar({ player }: { player: RemotePlayerState }) {
     group.current.rotation.y += diff * Math.min(1, delta * 12);
   });
 
+  const bodyRotation: [number, number, number] = player.isDead ? [0, 0, Math.PI / 2] : [0, 0, 0];
+
   return (
     <group ref={group} position={[player.x, player.y, player.z]} rotation={[0, player.rotationY, 0]}>
-      <mesh position={[-0.13, 0.25, 0]}>
-        <boxGeometry args={[0.14, 0.5, 0.15]} />
-        <meshStandardMaterial color="#1e3a8a" />
-      </mesh>
-      <mesh position={[0.13, 0.25, 0]}>
-        <boxGeometry args={[0.14, 0.5, 0.15]} />
-        <meshStandardMaterial color="#1e3a8a" />
-      </mesh>
-
-      <mesh position={[0, 0.65, 0]}>
-        <boxGeometry args={[0.48, 0.48, 0.28]} />
-        <meshStandardMaterial color="#111827" roughness={0.62} />
-      </mesh>
-      <mesh position={[-0.31, 0.62, 0]}>
-        <boxGeometry args={[0.13, 0.42, 0.14]} />
-        <meshStandardMaterial color="#111827" />
-      </mesh>
-      <mesh position={[0.31, 0.62, 0]}>
-        <boxGeometry args={[0.13, 0.42, 0.14]} />
-        <meshStandardMaterial color="#111827" />
-      </mesh>
-
-      <group position={[0, 0.85, 0]}>
-        <mesh position={[0, 0.26, 0]}>
-          <boxGeometry args={[0.42, 0.4, 0.36]} />
-          <meshStandardMaterial color="#f2c879" roughness={0.7} />
+      <group rotation={bodyRotation} position={player.isDead ? [0, 0.3, 0] : [0, 0, 0]}>
+        <mesh position={[-0.13, 0.25, 0]}>
+          <boxGeometry args={[0.14, 0.5, 0.15]} />
+          <meshStandardMaterial color="#1e3a8a" />
         </mesh>
-        <mesh position={[0, 0.47, 0]}>
-          <boxGeometry args={[0.46, 0.1, 0.39]} />
-          <meshStandardMaterial color="#334155" roughness={0.9} />
+        <mesh position={[0.13, 0.25, 0]}>
+          <boxGeometry args={[0.14, 0.5, 0.15]} />
+          <meshStandardMaterial color="#1e3a8a" />
         </mesh>
-      </group>
 
-      <Text
-        position={[-0.1, 0.72, 0.151]}
-        fontSize={0.08}
-        color="#eaf6ff"
-        anchorX="center"
-        anchorY="middle"
-        fontWeight="bold"
-      >
-        UID
-      </Text>
-
-      {player.lanternBuilt && (
-        <RemoteLantern
-          imageData={player.lanternImage}
-          lit={player.lanternLit}
-          shape={player.lanternShape}
-        />
-      )}
-
-      <group position={[0, 1.86, 0]}>
-        <mesh>
-          <planeGeometry args={[1.35, 0.29]} />
-          <meshBasicMaterial color="#0f172a" transparent opacity={0.78} />
+        <mesh position={[0, 0.65, 0]}>
+          <boxGeometry args={[0.48, 0.48, 0.28]} />
+          <meshStandardMaterial color="#111827" roughness={0.62} />
         </mesh>
+        <mesh position={[-0.31, 0.62, 0]}>
+          <boxGeometry args={[0.13, 0.42, 0.14]} />
+          <meshStandardMaterial color="#111827" />
+        </mesh>
+        <mesh position={[0.31, 0.62, 0]}>
+          <boxGeometry args={[0.13, 0.42, 0.14]} />
+          <meshStandardMaterial color="#111827" />
+        </mesh>
+
+        <group position={[0, 0.85, 0]}>
+          <mesh position={[0, 0.26, 0]}>
+            <boxGeometry args={[0.42, 0.4, 0.36]} />
+            <meshStandardMaterial color="#f2c879" roughness={0.7} />
+          </mesh>
+          <mesh position={[0, 0.47, 0]}>
+            <boxGeometry args={[0.46, 0.1, 0.39]} />
+            <meshStandardMaterial color="#334155" roughness={0.9} />
+          </mesh>
+        </group>
+
         <Text
-          position={[0, 0.01, 0.01]}
-          fontSize={0.1}
-          color="#7dd3fc"
+          position={[-0.1, 0.72, 0.151]}
+          fontSize={0.075}
+          color="#eaf6ff"
           anchorX="center"
           anchorY="middle"
           fontWeight="bold"
         >
+          UID
+        </Text>
+
+        <Text
+          position={[0, 0.66, -0.151]}
+          rotation={[0, Math.PI, 0]}
+          fontSize={0.07}
+          color="#ffffff"
+          anchorX="center"
+          anchorY="middle"
+          fontWeight="bold"
+          lineHeight={0.85}
+        >
+          {'DELIVER\nHAPPINESS'}
+        </Text>
+
+        {player.lanternBuilt && !player.isDead && (
+          <RemoteLantern imageData={player.lanternImage} lit={player.lanternLit} shape={player.lanternShape} />
+        )}
+      </group>
+
+      <group position={[0, 1.92, 0]}>
+        <mesh>
+          <planeGeometry args={[1.42, 0.36]} />
+          <meshBasicMaterial color="#0f172a" transparent opacity={0.82} />
+        </mesh>
+        <Text position={[0, 0.08, 0.01]} fontSize={0.1} color="#7dd3fc" anchorX="center" anchorY="middle" fontWeight="bold">
           {player.name}
         </Text>
+        <mesh position={[-0.43 + (Math.max(0, player.health) / 100) * 0.43, -0.085, 0.012]}>
+          <planeGeometry args={[0.86 * (Math.max(0, player.health) / 100), 0.065]} />
+          <meshBasicMaterial color={player.health > 50 ? '#22c55e' : player.health > 25 ? '#f59e0b' : '#ef4444'} />
+        </mesh>
+        <mesh position={[0, -0.085, 0.008]}>
+          <planeGeometry args={[0.9, 0.075]} />
+          <meshBasicMaterial color="#3f1515" />
+        </mesh>
+        {player.isDead && (
+          <Text position={[0, -0.085, 0.02]} fontSize={0.07} color="#fecaca" anchorX="center" anchorY="middle" fontWeight="bold">
+            GAME OVER
+          </Text>
+        )}
       </group>
     </group>
   );
@@ -205,9 +227,12 @@ export function MultiplayerPlayers() {
   const lanternLit = useGameStore((s) => s.personalLanternLit);
   const lanternShape = useGameStore((s) => s.personalLanternShapeMode);
   const lanternImage = useGameStore((s) => s.personalLanternImage);
+  const health = useGameStore((s) => s.health);
+  const isDead = useGameStore((s) => s.isDead);
   const setOnlineConnected = useGameStore((s) => s.setOnlineConnected);
   const setOnlinePlayerCount = useGameStore((s) => s.setOnlinePlayerCount);
   const syncMooncakeClaim = useGameStore((s) => s.syncMooncakeClaim);
+  const receiveCombatAttack = useGameStore((s) => s.receiveCombatAttack);
 
   const [remotePlayers, setRemotePlayers] = useState<Record<string, RemotePlayerState>>({});
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -227,6 +252,7 @@ export function MultiplayerPlayers() {
     });
 
     channelRef.current = channel;
+    setMultiplayerChannel(channel);
 
     channel.on('presence', { event: 'sync' }, () => {
       const state = channel.presenceState() as Record<string, Array<Record<string, unknown>>>;
@@ -247,6 +273,8 @@ export function MultiplayerPlayers() {
           lanternLit: Boolean(meta.lanternLit),
           lanternShape: (meta.lanternShape as LanternShapeMode) ?? 'generic',
           lanternImage: typeof meta.lanternImage === 'string' ? meta.lanternImage : null,
+          health: Number(meta.health ?? 100),
+          isDead: Boolean(meta.isDead),
         };
       }
 
@@ -288,18 +316,20 @@ export function MultiplayerPlayers() {
       const p = payload as Partial<RemotePlayerState> & { id?: string };
       if (!p.id || p.id === MULTIPLAYER_PLAYER_ID) return;
       setRemotePlayers((prev) => {
-        const existing = prev[p.id!] ?? {
+        const existing: RemotePlayerState = prev[p.id!] ?? {
           id: p.id!,
           name: 'UID Player',
-          floor: 2 as const,
+          floor: 2,
           x: 0,
           y: 0.5,
           z: 0,
           rotationY: 0,
           lanternBuilt: false,
           lanternLit: false,
-          lanternShape: 'generic' as LanternShapeMode,
+          lanternShape: 'generic',
           lanternImage: null,
+          health: 100,
+          isDead: false,
         };
         return {
           ...prev,
@@ -309,9 +339,15 @@ export function MultiplayerPlayers() {
             id: p.id!,
             floor: Number(p.floor ?? existing.floor) === 3 ? 3 : 2,
             lanternShape: (p.lanternShape as LanternShapeMode) ?? existing.lanternShape,
+            health: Number(p.health ?? existing.health),
+            isDead: Boolean(p.isDead ?? existing.isDead),
           },
         };
       });
+    });
+
+    channel.on('broadcast', { event: 'combat_attack' }, ({ payload }) => {
+      receiveCombatAttack(payload as CombatAttackPayload);
     });
 
     channel.on(
@@ -324,9 +360,7 @@ export function MultiplayerPlayers() {
       },
       (payload) => {
         const row = payload.new as { mooncake_id?: string; claimed_name?: string };
-        if (row.mooncake_id) {
-          syncMooncakeClaim(row.mooncake_id, row.claimed_name ?? 'UID Player');
-        }
+        if (row.mooncake_id) syncMooncakeClaim(row.mooncake_id, row.claimed_name ?? 'UID Player');
       },
     );
 
@@ -346,6 +380,8 @@ export function MultiplayerPlayers() {
           lanternLit: s.personalLanternLit,
           lanternShape: s.personalLanternShapeMode,
           lanternImage: s.personalLanternImage,
+          health: s.health,
+          isDead: s.isDead,
         });
 
         const { data } = await supabase
@@ -383,16 +419,18 @@ export function MultiplayerPlayers() {
       joinedRef.current = false;
       setOnlineConnected(false);
       setOnlinePlayerCount(1);
+      setMultiplayerChannel(null);
       void supabase.removeChannel(channel);
       channelRef.current = null;
     };
-  }, [setOnlineConnected, setOnlinePlayerCount, syncMooncakeClaim]);
+  }, [setOnlineConnected, setOnlinePlayerCount, syncMooncakeClaim, receiveCombatAttack]);
 
   useEffect(() => {
     const channel = channelRef.current;
     if (!channel || !joinedRef.current) return;
+
     const s = useGameStore.getState();
-    void channel.track({
+    const meta = {
       name: playerName,
       floor: currentFloor,
       x: s.playerPosition[0],
@@ -403,21 +441,20 @@ export function MultiplayerPlayers() {
       lanternLit,
       lanternShape,
       lanternImage,
-    });
+      health,
+      isDead,
+    };
+
+    void channel.track(meta);
     void channel.send({
       type: 'broadcast',
       event: 'player_meta',
       payload: {
         id: MULTIPLAYER_PLAYER_ID,
-        name: playerName,
-        floor: currentFloor,
-        lanternBuilt,
-        lanternLit,
-        lanternShape,
-        lanternImage,
+        ...meta,
       },
     });
-  }, [playerName, currentFloor, lanternBuilt, lanternLit, lanternShape, lanternImage]);
+  }, [playerName, currentFloor, lanternBuilt, lanternLit, lanternShape, lanternImage, health, isDead]);
 
   return (
     <>
