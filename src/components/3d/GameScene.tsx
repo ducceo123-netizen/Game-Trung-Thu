@@ -72,7 +72,7 @@ export function GameScene() {
 
             {/* Rabbits (Vacuum riding, Hiding behind boxes) */}
             <VacuumRidingRabbit />
-            <HidingRabbit position={[-4.0, 0.5, 11]} />
+            <HidingRabbit position={[6.2, 0.5, 5.7]} />
 
             {/* Walk-up workshop: upload a photo and turn it into a DIY lantern */}
             <LanternWorkshop />
