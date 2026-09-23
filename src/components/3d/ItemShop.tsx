@@ -1,6 +1,6 @@
 import { Text } from '@react-three/drei';
 
-export const ITEM_SHOP_POSITION:[number,number,number]=[5.8,0,-6.2];
+export const ITEM_SHOP_POSITION:[number,number,number]=[-6.7,0,-14.2];
 
 export function ItemShop() {
   return (
