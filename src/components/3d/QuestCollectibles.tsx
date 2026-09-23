@@ -6,135 +6,68 @@ import { useGameStore } from '../../stores/useGameStore';
 
 export function QuestCollectibles() {
   const questItems = useGameStore((s) => s.questItems);
-  const itemsGroupRef = useRef<THREE.Group>(null);
+  const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
-    const time = state.clock.getElapsedTime();
-    if (!itemsGroupRef.current) return;
-
-    itemsGroupRef.current.children.forEach((child, i) => {
-      // Bobbing & rotating
-      child.rotation.y = time * 1.5 + i;
-      child.position.y = (child.userData.baseY || 0.5) + Math.sin(time * 3 + i) * 0.08;
+    const t = state.clock.elapsedTime;
+    if (!groupRef.current) return;
+    groupRef.current.children.forEach((child, i) => {
+      child.rotation.y = Math.sin(t * 0.7 + i) * 0.18;
+      child.position.y = (child.userData.baseY || 0.55) + Math.sin(t * 2.2 + i) * 0.06;
     });
   });
 
   return (
-    <group ref={itemsGroupRef}>
-      {questItems.map((item) => {
+    <group ref={groupRef}>
+      {questItems.map((item, idx) => {
         if (item.collected) return null;
-
         return (
-          <group
-            key={item.id}
-            position={item.position}
-            userData={{ baseY: item.position[1] }}
-          >
-            {/* Glowing Beacon Ring on floor */}
-            <mesh position={[0, -0.4, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-              <ringGeometry args={[0.3, 0.45, 16]} />
-              <meshBasicMaterial color={item.color} transparent opacity={0.6} />
+          <group key={item.id} position={item.position} userData={{ baseY: item.position[1] }}>
+            {/* prize mooncake */}
+            <mesh castShadow rotation={[0, Math.PI / 4, 0]}>
+              <cylinderGeometry args={[0.34, 0.34, 0.18, 12]} />
+              <meshStandardMaterial color={idx % 2 ? '#b45309' : '#c76a1b'} roughness={0.72} />
+            </mesh>
+            <mesh position={[0, 0.095, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <circleGeometry args={[0.26, 12]} />
+              <meshStandardMaterial color="#d89a42" roughness={0.8} />
             </mesh>
 
-            {/* Pillar beam */}
-            <mesh position={[0, 0.6, 0]}>
-              <cylinderGeometry args={[0.08, 0.08, 2.0, 8]} />
-              <meshBasicMaterial color={item.color} transparent opacity={0.25} />
-            </mesh>
+            {/* embossed pattern */}
+            {[0, 1, 2, 3].map((i) => (
+              <mesh key={i} position={[Math.cos(i * Math.PI / 2) * 0.14, 0.105, Math.sin(i * Math.PI / 2) * 0.14]} rotation={[-Math.PI / 2,0,0]}>
+                <ringGeometry args={[0.025,0.043,8]} />
+                <meshBasicMaterial color="#8f4517" />
+              </mesh>
+            ))}
 
-            {/* Item 1: Extension Cord (Ổ cắm Lioa cam tròn) */}
-            {item.id === 'extension_cord' && (
-              <group scale={[0.8, 0.8, 0.8]}>
-                {/* Orange circular reel */}
-                <mesh castShadow>
-                  <cylinderGeometry args={[0.28, 0.28, 0.12, 16]} />
-                  <meshStandardMaterial color="#f97316" roughness={0.4} />
-                </mesh>
-                {/* 3 outlet sockets */}
-                {[-0.1, 0, 0.1].map((ox, idx) => (
-                  <mesh key={idx} position={[ox, 0.065, 0]}>
-                    <cylinderGeometry args={[0.04, 0.04, 0.02, 8]} />
-                    <meshBasicMaterial color="#0f172a" />
-                  </mesh>
-                ))}
-                {/* Handle */}
-                <mesh position={[0, 0.2, 0]}>
-                  <torusGeometry args={[0.12, 0.02, 6, 12]} />
-                  <meshStandardMaterial color="#0f172a" />
-                </mesh>
-              </group>
-            )}
-
-            {/* Item 2: Hot Glue Gun (Súng bắn keo silicon) */}
-            {item.id === 'glue_gun' && (
-              <group scale={[0.8, 0.8, 0.8]} rotation={[0, 0, 0.4]}>
-                {/* Gun body (blue/teal plastic) */}
-                <mesh castShadow>
-                  <boxGeometry args={[0.42, 0.15, 0.1]} />
-                  <meshStandardMaterial color="#06b6d4" roughness={0.3} />
-                </mesh>
-                {/* Handle grip */}
-                <mesh position={[-0.1, -0.16, 0]} rotation={[0, 0, -0.3]}>
-                  <boxGeometry args={[0.1, 0.25, 0.09]} />
-                  <meshStandardMaterial color="#0891b2" roughness={0.4} />
-                </mesh>
-                {/* Brass nozzle tip */}
-                <mesh position={[0.25, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
-                  <coneGeometry args={[0.04, 0.12, 8]} />
-                  <meshStandardMaterial color="#eab308" metalness={0.8} />
-                </mesh>
-                {/* Glue stick feeding into back */}
-                <mesh position={[-0.26, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-                  <cylinderGeometry args={[0.03, 0.03, 0.2, 8]} />
-                  <meshStandardMaterial color="#ffffff" transparent opacity={0.8} />
-                </mesh>
-              </group>
-            )}
-
-            {/* Item 3: LED Controller Remote (Remote LED mini) */}
-            {item.id === 'led_controller' && (
-              <group scale={[0.8, 0.8, 0.8]}>
-                {/* White flat remote */}
-                <mesh castShadow>
-                  <boxGeometry args={[0.22, 0.4, 0.04]} />
-                  <meshStandardMaterial color="#ffffff" roughness={0.3} />
-                </mesh>
-                {/* IR emitter bulb top */}
-                <mesh position={[0, 0.21, 0]}>
-                  <sphereGeometry args={[0.025, 8, 8]} />
-                  <meshBasicMaterial color="#ec4899" />
-                </mesh>
-                {/* Colored mini buttons grid */}
-                {Array.from({ length: 9 }).map((_, bi) => {
-                  const bx = ((bi % 3) - 1) * 0.06;
-                  const by = (Math.floor(bi / 3) - 1) * 0.08;
-                  const bcolor = ['#ef4444', '#22c55e', '#3b82f6', '#eab308', '#ec4899', '#06b6d4', '#8b5cf6', '#f97316', '#ffffff'][bi];
-                  return (
-                    <mesh key={bi} position={[bx, by, 0.022]} rotation={[Math.PI / 2, 0, 0]}>
-                      <cylinderGeometry args={[0.02, 0.02, 0.01, 8]} />
-                      <meshBasicMaterial color={bcolor} />
-                    </mesh>
-                  );
-                })}
-              </group>
-            )}
-
-            {/* Floating text name */}
-            <group position={[0, 0.6, 0]}>
-              <Text
-                fontSize={0.11}
-                color="#ffffff"
-                anchorX="center"
-                anchorY="middle"
-                outlineWidth={0.02}
-                outlineColor="#0f172a"
-              >
-                {item.vietnameseName}
+            {/* ticket sticking out */}
+            <group position={[0.28, 0.14, 0]} rotation={[0, 0, -0.18]}>
+              <mesh>
+                <boxGeometry args={[0.56, 0.18, 0.025]} />
+                <meshStandardMaterial color="#f8fafc" roughness={0.5} />
+              </mesh>
+              <Text position={[0,0,0.016]} fontSize={0.045} color="#0f4c75" anchorX="center" anchorY="middle" fontWeight="bold">
+                VÉ MÁY BAY • 3.000.000đ
               </Text>
             </group>
 
-            {/* Light source */}
-            <pointLight color={item.color} intensity={2.0} distance={3.5} decay={2} />
+            <Text
+              position={[0, 0.62, 0]}
+              fontSize={0.1}
+              color="#fff7d6"
+              anchorX="center"
+              anchorY="middle"
+              outlineWidth={0.015}
+              outlineColor="#7c2d12"
+            >
+              {item.vietnameseName}
+            </Text>
+
+            <mesh position={[0, -0.23, 0]} rotation={[-Math.PI / 2,0,0]}>
+              <ringGeometry args={[0.32,0.44,16]} />
+              <meshBasicMaterial color={item.color} transparent opacity={0.45} />
+            </mesh>
           </group>
         );
       })}
