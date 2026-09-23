@@ -108,6 +108,7 @@ export function ItemShopModal() {
                     📦 BỎ RA ĐẤT
                   </button>
                 </div>
+                }
               </div>;
             })}
           </div>
