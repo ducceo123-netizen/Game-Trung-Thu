@@ -13,6 +13,7 @@ import { DialogueBox } from './components/ui/DialogueBox';
 import { AchievementPopup } from './components/ui/AchievementPopup';
 import { EndingSequence } from './components/ui/EndingSequence';
 import { MobileControls } from './components/ui/MobileControls';
+import { LanternWorkshopModal } from './components/ui/LanternWorkshopModal';
 import { useGameStore } from './stores/useGameStore';
 
 export default function App() {
@@ -71,6 +72,8 @@ export default function App() {
           </div>
         </>
       )}
+
+      <LanternWorkshopModal />
 
       {/* Phase 1: Player Name Start Overlay */}
       {gamePhase === 'start_overlay' && <StartOverlay />}
