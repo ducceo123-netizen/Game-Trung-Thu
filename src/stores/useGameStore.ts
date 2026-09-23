@@ -3,6 +3,7 @@ import { GamePhase, DialogueData, Achievement, QuestItem } from '../types/game';
 import { sounds } from '../utils/soundEffects';
 import { MULTIPLAYER_PLAYER_ID, MULTIPLAYER_ROOM_ID, supabase } from '../lib/supabase';
 import { broadcastCombatAttack, type CombatAttackPayload } from '../lib/multiplayerBus';
+import { useEconomyStore } from './useEconomyStore';
 
 export type LanternShapeMode = 'portrait' | 'wide' | 'generic';
 
@@ -89,6 +90,7 @@ interface GameState {
 
   workshopOpen: boolean;
   personalLanternImage: string | null;
+  personalLanternText: string;
   personalLanternBuilt: boolean;
   personalLanternLit: boolean;
   personalLanternShapeMode: LanternShapeMode;
@@ -141,6 +143,7 @@ interface GameState {
   openWorkshop: () => void;
   closeWorkshop: () => void;
   setPersonalLanternImage: (image: string | null) => void;
+  setPersonalLanternText: (text: string) => void;
   setPersonalLanternShapeMode: (mode: LanternShapeMode) => void;
   buildPersonalLantern: () => void;
   lightPersonalLantern: () => void;
@@ -204,6 +207,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   workshopOpen: false,
   personalLanternImage: null,
+  personalLanternText: '',
   personalLanternBuilt: false,
   personalLanternLit: false,
   personalLanternShapeMode: 'generic',
@@ -240,11 +244,17 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   attackWithLantern: () => {
     const state = get();
-    if (!state.personalLanternBuilt || state.isDead || state.workshopOpen || state.gamePhase !== 'playing') return;
+    const equipped = useEconomyStore.getState().equippedItem;
+    if (!state.personalLanternBuilt || state.isDead || state.workshopOpen || state.socialPostOpen || state.gamePhase !== 'playing') return;
 
     const now = Date.now();
-    if (now - lastLanternAttackAt < 700) return;
+    const cooldown = equipped === 'blaster' ? 420 : equipped === 'sword' ? 560 : 700;
+    if (now - lastLanternAttackAt < cooldown) return;
     lastLanternAttackAt = now;
+
+    const weapon = equipped === 'sword' ? 'sword' : equipped === 'blaster' ? 'blaster' : 'lantern';
+    const damage = weapon === 'sword' ? 35 : weapon === 'blaster' ? 20 : 25;
+    const range = weapon === 'sword' ? 2.2 : weapon === 'blaster' ? 8.0 : 1.85;
 
     sounds.playBambooPoke();
     set((s) => ({ lanternAttackTrigger: s.lanternAttackTrigger + 1 }));
@@ -258,7 +268,9 @@ export const useGameStore = create<GameState>((set, get) => ({
       y: state.playerPosition[1],
       z: state.playerPosition[2],
       rotationY: state.playerRotationY,
-      damage: 25,
+      damage,
+      range,
+      weapon,
       createdAt: now,
     });
   },
@@ -272,7 +284,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const dx = state.playerPosition[0] - payload.x;
     const dz = state.playerPosition[2] - payload.z;
     const distance = Math.hypot(dx, dz);
-    if (distance > 1.85 || distance < 0.01) return;
+    if (distance > Math.max(1.5, payload.range ?? 1.85) || distance < 0.01) return;
 
     const inv = 1 / distance;
     const toTargetX = dx * inv;
@@ -281,7 +293,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const forwardZ = Math.cos(payload.rotationY);
     const facingDot = forwardX * toTargetX + forwardZ * toTargetZ;
 
-    if (facingDot < 0.1) return;
+    if (facingDot < (payload.weapon === 'blaster' ? 0.78 : 0.1)) return;
     get().applyDamage(payload.damage, payload.attackerName);
   },
 
@@ -305,6 +317,13 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (dead) {
       sounds.playZap();
       get().setTeamAnnouncement(`💥 ${attackerName} vừa hạ ${state.playerName} bằng lồng đèn!`);
+      void useEconomyStore.getState().dropOnDeath(
+        state.playerName,
+        state.playerPosition[0],
+        state.playerPosition[2],
+      ).then((dropped) => {
+        if (dropped > 0) get().setTeamAnnouncement(`🌕 ${state.playerName} rơi ra ${dropped} bánh Trung Thu!`);
+      });
       window.setTimeout(() => {
         if (get().isDead) get().respawnPlayer();
       }, 60000);
@@ -536,10 +555,14 @@ export const useGameStore = create<GameState>((set, get) => ({
     personalLanternLit: false,
     playerHasLanternEquipped: false,
   }),
+  setPersonalLanternText: (text) => set({
+    personalLanternText: text.slice(0, 42),
+    personalLanternBuilt: false,
+  }),
   setPersonalLanternShapeMode: (mode) => set({ personalLanternShapeMode: mode }),
 
   buildPersonalLantern: () => {
-    if (!get().personalLanternImage) return;
+    if (!get().personalLanternImage && !get().personalLanternText.trim()) return;
     sounds.playAchievement();
     set({
       personalLanternBuilt: true,
