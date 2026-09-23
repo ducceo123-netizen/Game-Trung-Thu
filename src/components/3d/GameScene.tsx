@@ -12,6 +12,9 @@ import { Floor3Halloween } from './Floor3Halloween';
 import { BooGhost } from './BooGhost';
 import { MultiplayerPlayers } from './MultiplayerPlayers';
 import { SocialPostBoard } from './SocialPostBoard';
+import { WorldMooncakes } from './WorldMooncakes';
+import { ItemShop } from './ItemShop';
+import { AnhKhoeNPC } from './AnhKhoeNPC';
 import { useGameStore } from '../../stores/useGameStore';
 
 export function GameScene() {
@@ -42,7 +45,10 @@ export function GameScene() {
                 <Environment />
                 <DIYLanterns />
                 <QuestCollectibles />
+                <WorldMooncakes />
                 <SecurityGuardNPC position={[2.2, 0, 12]} />
+                <AnhKhoeNPC />
+                <ItemShop />
                 <SocialPostBoard />
                 <LanternWorkshop />
               </>
