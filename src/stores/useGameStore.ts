@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { GamePhase, DialogueData, Achievement, QuestItem } from '../types/game';
 import { sounds } from '../utils/soundEffects';
+import { MULTIPLAYER_PLAYER_ID, MULTIPLAYER_ROOM_ID, supabase } from '../lib/supabase';
 
 export type LanternShapeMode = 'portrait' | 'wide' | 'generic';
 
@@ -60,7 +61,10 @@ interface GameState {
 
   currentFloor: 2 | 3;
   playerPosition: [number, number, number];
+  playerRotationY: number;
   foundAllMooncakes: boolean;
+  onlineConnected: boolean;
+  onlinePlayerCount: number;
 
   isBeautyMode: boolean;
   isSlowed: boolean;
@@ -90,6 +94,9 @@ interface GameState {
   setGamePhase: (phase: GamePhase) => void;
   setCurrentFloor: (floor: 2 | 3) => void;
   setPlayerPosition: (position: [number, number, number]) => void;
+  setPlayerTransform: (position: [number, number, number], rotationY: number) => void;
+  setOnlineConnected: (connected: boolean) => void;
+  setOnlinePlayerCount: (count: number) => void;
 
   equipBambooPole: () => void;
   triggerBambooPoke: () => void;
@@ -99,7 +106,8 @@ interface GameState {
   showAchievement: (achievement: Achievement) => void;
   clearAchievement: () => void;
   setInteractionPrompt: (prompt: { text: string; action: () => void } | null) => void;
-  collectItem: (itemId: string) => void;
+  collectItem: (itemId: string) => Promise<void>;
+  syncMooncakeClaim: (itemId: string, claimedName: string) => void;
   rebootMoonServer: () => void;
 
   applySalonpasHealing: () => void;
@@ -148,7 +156,10 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   currentFloor: 2,
   playerPosition: [0, 0.5, 14],
+  playerRotationY: Math.PI,
   foundAllMooncakes: false,
+  onlineConnected: false,
+  onlinePlayerCount: 1,
 
   isBeautyMode: false,
   isSlowed: false,
@@ -191,6 +202,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
   setPlayerPosition: (position) => set({ playerPosition: position }),
+  setPlayerTransform: (position, rotationY) => set({ playerPosition: position, playerRotationY: rotationY }),
+  setOnlineConnected: (connected) => set({ onlineConnected: connected }),
+  setOnlinePlayerCount: (count) => set({ onlinePlayerCount: Math.max(1, count) }),
 
   equipBambooPole: () => {
     sounds.playPickup();
@@ -237,30 +251,76 @@ export const useGameStore = create<GameState>((set, get) => ({
   clearAchievement: () => set({ activeAchievement: null }),
   setInteractionPrompt: (prompt) => set({ interactionPrompt: prompt }),
 
-  collectItem: (itemId) => {
-    const { collectedItemIds, questItems } = get();
+  collectItem: async (itemId) => {
+    const { collectedItemIds, questItems, playerName } = get();
     if (collectedItemIds.includes(itemId)) return;
-    const updatedIds = [...collectedItemIds, itemId];
+
+    const { error } = await supabase
+      .from('mooncake_claims')
+      .insert({
+        room_id: MULTIPLAYER_ROOM_ID,
+        mooncake_id: itemId,
+        claimed_by: MULTIPLAYER_PLAYER_ID,
+        claimed_name: playerName,
+      });
+
+    if (error) {
+      if (error.code === '23505') {
+        const { data } = await supabase
+          .from('mooncake_claims')
+          .select('claimed_name')
+          .eq('room_id', MULTIPLAYER_ROOM_ID)
+          .eq('mooncake_id', itemId)
+          .maybeSingle();
+
+        get().syncMooncakeClaim(itemId, data?.claimed_name ?? 'Một đồng đội');
+        get().showAchievement({
+          id: `already_claimed_${itemId}`,
+          title: '😵 CHẬM MỘT NHỊP',
+          subtitle: `${data?.claimed_name ?? 'Có người'} đã tìm thấy bánh này trước bạn.`,
+        });
+        return;
+      }
+
+      get().showAchievement({
+        id: `claim_error_${itemId}`,
+        title: 'MẠNG ĐANG CHẬP CHỜN',
+        subtitle: 'Chưa xác nhận được bánh này. Thử bấm E lại nha.',
+      });
+      return;
+    }
+
     const item = questItems.find((q) => q.id === itemId);
+    get().syncMooncakeClaim(itemId, playerName);
     sounds.playAchievement();
-    set({
-      collectedItemIds: updatedIds,
-      foundAllMooncakes: updatedIds.length === 3,
-      questItems: questItems.map((q) => q.id === itemId ? { ...q, collected: true } : q),
-    });
     get().showAchievement({
       id: `ticket_${itemId}`,
-      title: `✈️ TÌM THẤY BÁNH BÍ MẬT (${updatedIds.length}/3)`,
-      subtitle: `${item?.vietnameseName ?? 'Bánh Trung Thu'} — bên trong là vé máy bay nội địa trị giá 3.000.000đ!`,
+      title: '✈️ BẠN LÀ NGƯỜI TÌM THẤY BÁNH!',
+      subtitle: `${item?.vietnameseName ?? 'Bánh Trung Thu'} — vé máy bay nội địa trị giá 3.000.000đ!`,
     });
-    get().setTeamAnnouncement(`🎉 ${get().playerName} vừa tìm thấy bánh bí mật #${updatedIds.length}!`);
+  },
+
+  syncMooncakeClaim: (itemId, claimedName) => {
+    const { collectedItemIds, questItems } = get();
+    if (collectedItemIds.includes(itemId)) return;
+
+    const updatedIds = [...collectedItemIds, itemId];
+    set({
+      collectedItemIds: updatedIds,
+      foundAllMooncakes: updatedIds.length >= 3,
+      moonOnline: updatedIds.length >= 3,
+      questItems: questItems.map((q) => q.id === itemId ? { ...q, collected: true } : q),
+    });
+
+    const number = itemId.split('_').pop() ?? String(updatedIds.length);
+    get().setTeamAnnouncement(`🎉 ${claimedName} vừa tìm thấy bánh bí mật #${number}!`);
+
     if (updatedIds.length === 3) {
-      set({ moonOnline: true });
       setTimeout(() => get().showAchievement({
         id: 'all_mooncakes',
-        title: '🏆 ĐỦ 3 BÁNH TRUNG THU',
-        subtitle: 'Đã mở đủ 3 vé máy bay nội địa 3.000.000đ. Flex đi!',
-      }), 700);
+        title: '🏆 CẢ PHÒNG ĐÃ TÌM ĐỦ 3 BÁNH',
+        subtitle: 'Ba vé máy bay nội địa 3.000.000đ đã có chủ!',
+      }), 500);
     }
   },
 
