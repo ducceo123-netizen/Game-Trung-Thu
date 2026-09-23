@@ -21,16 +21,33 @@ export function LanternWorkshopModal() {
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result !== 'string') return;
-      const dataUrl = reader.result;
+      const sourceDataUrl = reader.result;
       const preview = new Image();
       preview.onload = () => {
         const ratio = preview.naturalWidth / Math.max(1, preview.naturalHeight);
         if (ratio > 1.3) setShapeMode('wide');
         else if (ratio < 0.78) setShapeMode('portrait');
         else setShapeMode('generic');
-        setImage(dataUrl);
+
+        // Compress uploaded images before syncing them through Realtime Presence.
+        // 256px is enough for the in-game lantern face and keeps multiplayer traffic light.
+        const maxSide = 256;
+        const scale = Math.min(1, maxSide / Math.max(preview.naturalWidth, preview.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(preview.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(preview.naturalHeight * scale));
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+          setImage(sourceDataUrl);
+          return;
+        }
+
+        ctx.drawImage(preview, 0, 0, canvas.width, canvas.height);
+        const compactDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+        setImage(compactDataUrl);
       };
-      preview.src = dataUrl;
+      preview.src = sourceDataUrl;
     };
     reader.readAsDataURL(file);
   };
