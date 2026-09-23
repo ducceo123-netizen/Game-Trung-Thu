@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { useGameStore } from '../../stores/useGameStore';
 import { sounds } from '../../utils/soundEffects';
 import { PlayerLantern } from './PlayerLantern';
+import { BloodBurst } from './BloodBurst';
 
 // Keyboard movement state tracker
 interface KeysState {
@@ -40,16 +41,16 @@ export function Player() {
   const openWorkshop = useGameStore((s) => s.openWorkshop);
   const personalLanternBuilt = useGameStore((s) => s.personalLanternBuilt);
   const personalLanternLit = useGameStore((s) => s.personalLanternLit);
-  const lightPersonalLantern = useGameStore((s) => s.lightPersonalLantern);
   const togglePersonalLanternLight = useGameStore((s) => s.togglePersonalLanternLight);
+  const attackWithLantern = useGameStore((s) => s.attackWithLantern);
+  const isDead = useGameStore((s) => s.isDead);
+  const respawnNonce = useGameStore((s) => s.respawnNonce);
   const currentFloor = useGameStore((s) => s.currentFloor);
   const setCurrentFloor = useGameStore((s) => s.setCurrentFloor);
   const setPlayerTransform = useGameStore((s) => s.setPlayerTransform);
   const questItems = useGameStore((s) => s.questItems);
   const collectedIds = useGameStore((s) => s.collectedItemIds);
   const collectItem = useGameStore((s) => s.collectItem);
-  const rebootMoonServer = useGameStore((s) => s.rebootMoonServer);
-  const interactRabbit = useGameStore((s) => s.interactRabbit);
   const showAchievement = useGameStore((s) => s.showAchievement);
   const triggerBambooPoke = useGameStore((s) => s.triggerBambooPoke);
 
@@ -122,6 +123,9 @@ export function Player() {
             triggerBambooPoke();
           }
           break;
+        case 'KeyJ':
+          attackWithLantern();
+          break;
       }
     };
 
@@ -161,6 +165,7 @@ export function Player() {
     const handleMouseMove = (e: MouseEvent) => {
       if (useGameStore.getState().gamePhase !== 'playing') return;
       if (useGameStore.getState().workshopOpen) return;
+      if (useGameStore.getState().isDead) return;
       if ((e.target as HTMLElement).closest('.interactive-ui')) return;
 
       const dx = e.movementX;
@@ -173,10 +178,16 @@ export function Player() {
       );
     };
 
-    // Left click keeps the existing bamboo poke action.
+    // Left click attacks with the personal lantern after it is built.
+    // Before that it keeps the old bamboo poke gag.
     const handleMouseDown = (e: MouseEvent) => {
       if ((e.target as HTMLElement).closest('.interactive-ui')) return;
-      if (e.button === 0 && hasBambooPole) {
+      if (e.button !== 0) return;
+      const state = useGameStore.getState();
+      if (state.isDead) return;
+      if (state.personalLanternBuilt) {
+        attackWithLantern();
+      } else if (hasBambooPole) {
         triggerBambooPoke();
       }
     };
@@ -192,7 +203,7 @@ export function Player() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [hasBambooPole, triggerBambooPoke, togglePersonalLanternLight]);
+  }, [hasBambooPole, triggerBambooPoke, togglePersonalLanternLight, attackWithLantern]);
 
   // Floor transition spawn points.
   useEffect(() => {
@@ -206,12 +217,13 @@ export function Player() {
       rotationY.current = Math.PI;
     }
     setInteractionPrompt(null);
-  }, [currentFloor, setInteractionPrompt]);
+  }, [currentFloor, respawnNonce, setInteractionPrompt]);
 
   // Handle interact key trigger
   useEffect(() => {
     const handleInteractCheck = (e: KeyboardEvent) => {
       if (e.code === 'KeyE') {
+        if (useGameStore.getState().isDead) return;
         const currentPrompt = useGameStore.getState().interactionPrompt;
         if (currentPrompt) {
           currentPrompt.action();
@@ -233,6 +245,18 @@ export function Player() {
   useFrame((state, delta) => {
     if (gamePhase !== 'playing') return;
     if (workshopOpen) return;
+
+    if (isDead) {
+      if (playerRef.current) {
+        playerRef.current.position.copy(pos.current);
+        playerRef.current.rotation.y = rotationY.current;
+        playerRef.current.rotation.z = THREE.MathUtils.lerp(playerRef.current.rotation.z, Math.PI / 2, Math.min(1, delta * 6));
+      }
+      setInteractionPrompt(null);
+      return;
+    } else if (playerRef.current) {
+      playerRef.current.rotation.z = THREE.MathUtils.lerp(playerRef.current.rotation.z, 0, Math.min(1, delta * 8));
+    }
 
     // Movement calculation
     let moveSpeed = 4.2;
@@ -459,10 +483,10 @@ export function Player() {
         tip: '[E] Chữa lành cột sống',
       },
       {
-        name: 'LỒNG ĐÈN BIA + THỎ',
+        name: 'LỒNG ĐÈN LON BIA',
         pos: [3.2, 1.7, 4.4],
         action: triggerBeerCan,
-        tip: '[E] Chọc con thỏ ngồi trên lon bia',
+        tip: '[E] Lắc lon bia phát sáng',
       },
       {
         name: 'LỒNG ĐÈN CHAI SATORI',
@@ -515,23 +539,6 @@ export function Player() {
       }
     }
     if (nearLantern) return;
-
-    // 7. Rabbit check — hiding inside the turquoise booth
-    const rabbitDist = playerPos.distanceTo(new THREE.Vector3(6.2, 0.5, 5.7));
-    if (rabbitDist < 2.2) {
-      setInteractionPrompt({
-        text: '[E] Bắt chuyện với Thỏ Trốn Họp',
-        action: () => {
-          const speech = interactRabbit();
-          showAchievement({
-            id: 'rabbit_chat',
-            title: 'THỎ TRUNG THU',
-            subtitle: speech,
-          });
-        },
-      });
-      return;
-    }
 
     // Nothing nearby
     setInteractionPrompt(null);
@@ -586,6 +593,20 @@ export function Player() {
           <meshStandardMaterial color="#2aa7d6" emissive="#0e7490" emissiveIntensity={0.3} />
         </mesh>
 
+        {/* Back print based on the real UID shirt reference */}
+        <Text
+          position={[0, 0.69, -0.151]}
+          rotation={[0, Math.PI, 0]}
+          fontSize={0.073}
+          color="#ffffff"
+          anchorX="center"
+          anchorY="middle"
+          fontWeight="bold"
+          lineHeight={0.82}
+        >
+          {'DELIVER\nHAPPINESS'}
+        </Text>
+
         {/* Left Arm */}
         <mesh position={[-0.32, 0.62, 0]} castShadow>
           <boxGeometry args={[0.14, 0.42, 0.15]} />
@@ -600,6 +621,7 @@ export function Player() {
 
         {/* Personal photo lantern follows the player after workshop build */}
         <PlayerLantern />
+        <BloodBurst />
 
         {/* --- THE SIGNATURE BAMBOO POLE WITH HOOK TIP --- */}
         {hasBambooPole && (
