@@ -72,6 +72,7 @@ export function Player() {
   const cameraYaw = useRef(Math.PI);
   const cameraPitch = useRef(0.28);
   const lastPositionSync = useRef(0);
+  const handledRespawnNonce = useRef(0);
 
   const keys = useRef<KeysState>({
     forward: false,
@@ -205,19 +206,24 @@ export function Player() {
     };
   }, [hasBambooPole, triggerBambooPoke, togglePersonalLanternLight, attackWithLantern]);
 
-  // Floor transition spawn points.
+  // Floor transition spawn points + safe respawn at the Lầu 2 entrance.
   useEffect(() => {
-    if (currentFloor === 3) {
+    const isFreshRespawn = respawnNonce !== handledRespawnNonce.current;
+    if (isFreshRespawn) {
+      handledRespawnNonce.current = respawnNonce;
+      pos.current.set(0, 0.5, 14);
+    } else if (currentFloor === 3) {
       pos.current.set(0, 0.5, 11.2);
-      cameraYaw.current = Math.PI;
-      rotationY.current = Math.PI;
     } else {
       pos.current.set(7.0, 0.5, -1.8);
-      cameraYaw.current = Math.PI;
-      rotationY.current = Math.PI;
     }
+
+    cameraYaw.current = Math.PI;
+    rotationY.current = Math.PI;
+    velY.current = 0;
+    setPlayerTransform([pos.current.x, pos.current.y, pos.current.z], rotationY.current);
     setInteractionPrompt(null);
-  }, [currentFloor, respawnNonce, setInteractionPrompt]);
+  }, [currentFloor, respawnNonce, setInteractionPrompt, setPlayerTransform]);
 
   // Handle interact key trigger
   useEffect(() => {
