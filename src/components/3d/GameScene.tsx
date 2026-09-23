@@ -11,6 +11,7 @@ import { LanternWorkshop } from './LanternWorkshop';
 import { Floor3Halloween } from './Floor3Halloween';
 import { BooGhost } from './BooGhost';
 import { MultiplayerPlayers } from './MultiplayerPlayers';
+import { SocialPostBoard } from './SocialPostBoard';
 import { useGameStore } from '../../stores/useGameStore';
 
 export function GameScene() {
@@ -42,6 +43,7 @@ export function GameScene() {
                 <DIYLanterns />
                 <QuestCollectibles />
                 <SecurityGuardNPC position={[2.2, 0, 12]} />
+                <SocialPostBoard />
                 <LanternWorkshop />
               </>
             ) : (
