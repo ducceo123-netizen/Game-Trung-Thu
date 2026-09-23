@@ -19,7 +19,19 @@ export const supabase = createClient(
   },
 );
 
-export const MULTIPLAYER_PLAYER_ID =
-  typeof crypto !== 'undefined' && 'randomUUID' in crypto
-    ? crypto.randomUUID()
-    : `uid-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+function getPersistentPlayerId() {
+  if (typeof window === 'undefined') return `uid-${Date.now()}`;
+  const key = 'uid-game-player-id';
+  const existing = window.localStorage.getItem(key);
+  if (existing) return existing;
+
+  const next =
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `uid-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  window.localStorage.setItem(key, next);
+  return next;
+}
+
+export const MULTIPLAYER_PLAYER_ID = getPersistentPlayerId();
