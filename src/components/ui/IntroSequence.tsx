@@ -48,7 +48,7 @@ export function IntroSequence() {
               23:47
             </span>
             <p className="text-xs text-slate-500 mt-1 uppercase tracking-widest">
-              Đêm rằm tháng 8 · Tầng 7 Tòa nhà Công ty
+              Đêm rằm tháng 8 · Lầu 4 Văn phòng UID Gò Dầu
             </p>
           </div>
         )}
@@ -79,7 +79,7 @@ export function IntroSequence() {
               🏮 NHIỆM VỤ: KHỞI ĐỘNG LẠI TRUNG THU 🏮
             </div>
             <p className="text-sm text-yellow-200">
-              Tiến lại gần Chú Bảo Vệ để nhận vũ khí tối thượng!
+              Bắt đầu ở khu reception UID, gặp Chú Bảo Vệ rồi khám phá Lầu 4!
             </p>
             <button
               onClick={handleSkipOrStart}
