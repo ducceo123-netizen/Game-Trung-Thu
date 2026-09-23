@@ -133,10 +133,10 @@ export function RetroHUD() {
               {personalLanternLit
                 ? 'Đèn cá nhân: ĐÃ THẮP SÁNG ✨'
                 : personalLanternBuilt
-                  ? 'Đèn cá nhân: ĐÃ LÀM XONG — tới quầy bấm E để thắp'
-                  : 'Đi theo bảng chỉ dẫn → up ảnh → làm lồng đèn'}
+                  ? 'Đèn cá nhân: ĐÃ LÀM XONG — đi theo biển → KHU THẮP SÁNG'
+                  : 'Theo biển ← WORKSHOP UID → up ảnh → làm lồng đèn'}
             </div>
-            <div className="text-amber-400/80">Lầu 4 • Văn phòng Gò Dầu</div>
+            <div className="text-amber-400/80">UID • Lầu 4 • Văn phòng Gò Dầu</div>
           </div>
 
           {/* Active Buffs / Debuffs Status */}
