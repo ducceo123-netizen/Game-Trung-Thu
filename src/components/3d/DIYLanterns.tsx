@@ -154,15 +154,9 @@ export function SalonpasLantern({ position }: { position: V3 }) {
   );
 }
 
-export function BeerRabbitLantern({ position }: { position: V3 }) {
-  const fled = useGameStore((s) => s.beerCanRabbitFled);
-  const rabbitX = useRef(0);
-  useFrame((_, delta) => {
-    if (fled) rabbitX.current = Math.min(5, rabbitX.current + delta * 4.5);
-  });
-
+export function BeerCanLantern({ position }: { position: V3 }) {
   return (
-    <BaseLantern position={position} name="BIA + THỎ" color="#ffde78">
+    <BaseLantern position={position} name="LON BIA DIY" color="#ffde78">
       <group>
         <mesh castShadow>
           <cylinderGeometry args={[0.32, 0.32, 0.95, 20]} />
@@ -172,44 +166,17 @@ export function BeerRabbitLantern({ position }: { position: V3 }) {
           <cylinderGeometry args={[0.3, 0.32, 0.055, 20]} />
           <meshStandardMaterial color="#d8d9d6" metalness={0.82} roughness={0.18} />
         </mesh>
+        <mesh position={[0, -0.47, 0]}>
+          <cylinderGeometry args={[0.3, 0.32, 0.055, 20]} />
+          <meshStandardMaterial color="#d8d9d6" metalness={0.82} roughness={0.18} />
+        </mesh>
         <Text position={[0, 0.04, 0.325]} fontSize={0.11} color="#f5e6b2" anchorX="center" anchorY="middle" fontWeight="bold">
           BIA GÒ DẦU
         </Text>
+        <Text position={[0, -0.14, 0.326]} fontSize={0.05} color="#fff7cf" anchorX="center" anchorY="middle">
+          quấn LED thủ công
+        </Text>
         <WarmFairyLights radiusX={0.35} radiusY={0.44} z={0.33} count={12} />
-        {!fled && (
-          <group position={[0, 0.67, 0.03]} scale={[0.25, 0.25, 0.25]}>
-            <mesh castShadow>
-              <sphereGeometry args={[0.62, 12, 10]} />
-              <meshStandardMaterial color="#f7f7f2" roughness={0.78} />
-            </mesh>
-            <mesh position={[0, 0.62, 0.12]} castShadow>
-              <sphereGeometry args={[0.48, 12, 10]} />
-              <meshStandardMaterial color="#f7f7f2" roughness={0.78} />
-            </mesh>
-            {[-0.18, 0.18].map((x) => (
-              <group key={x}>
-                <mesh position={[x, 1.2, 0.08]} rotation={[0.05, 0, x * 0.8]}>
-                  <capsuleGeometry args={[0.095, 0.46, 4, 8]} />
-                  <meshStandardMaterial color="#f7f7f2" roughness={0.72} />
-                </mesh>
-                <mesh position={[x, 1.2, 0.13]} rotation={[0.05, 0, x * 0.8]}>
-                  <capsuleGeometry args={[0.042, 0.35, 4, 8]} />
-                  <meshStandardMaterial color="#f5a3b7" roughness={0.62} />
-                </mesh>
-              </group>
-            ))}
-            <mesh position={[0, 0.58, 0.56]}>
-              <sphereGeometry args={[0.06, 8, 8]} />
-              <meshStandardMaterial color="#e78aa2" />
-            </mesh>
-          </group>
-        )}
-        {fled && (
-          <mesh position={[rabbitX.current, 0.82 + Math.sin(rabbitX.current * 3) * 0.18, 0]} scale={[0.18,0.18,0.18]}>
-            <sphereGeometry args={[0.7, 8, 8]} />
-            <meshStandardMaterial color="#ffffff" transparent opacity={0.55} />
-          </mesh>
-        )}
         <Tassel />
       </group>
     </BaseLantern>
@@ -477,7 +444,7 @@ export function DIYLanterns() {
   return (
     <group>
       <SalonpasLantern position={[-3.1,1.65,6.0]} />
-      <BeerRabbitLantern position={[3.2,1.7,4.4]} />
+      <BeerCanLantern position={[3.2,1.7,4.4]} />
       <SatoriBottleLantern position={[-2.6,1.65,1.5]} />
       <CardboardBoxLantern position={[2.9,1.65,-1.9]} />
       <InstantNoodleLantern position={[-2.7,1.65,-4.7]} />
