@@ -16,6 +16,8 @@ import { WorldMooncakes } from './WorldMooncakes';
 import { WorldItems } from './WorldItems';
 import { ItemShop } from './ItemShop';
 import { AnhKhoeNPC } from './AnhKhoeNPC';
+import { Floor1Lobby } from './Floor1Lobby';
+import { CollaborativeWhiteboard } from './CollaborativeWhiteboard';
 import { useGameStore } from '../../stores/useGameStore';
 
 export function GameScene() {
@@ -33,7 +35,12 @@ export function GameScene() {
       >
         <Suspense fallback={null}>
           <Physics gravity={[0, -9.81, 0]}>
-            {currentFloor === 2 ? (
+            {currentFloor === 1 ? (
+              <>
+                <Floor1Lobby />
+                <SecurityGuardNPC position={[2.2, 0, 6.8]} />
+              </>
+            ) : currentFloor === 2 ? (
               <>
                 <Atmosphere />
                 <ambientLight
@@ -46,9 +53,9 @@ export function GameScene() {
                 <Environment />
                 <DIYLanterns />
                 <QuestCollectibles />
-                <SecurityGuardNPC position={[2.2, 0, 12]} />
                 <AnhKhoeNPC />
                 <ItemShop />
+                <CollaborativeWhiteboard />
                 <SocialPostBoard />
                 <LanternWorkshop />
               </>
