@@ -32,7 +32,7 @@ interface EconomyState {
   equipItem: (item: ShopItemId | null) => void;
   openShop: () => void;
   closeShop: () => void;
-  dropOnDeath: (playerName: string, x: number, z: number) => Promise<number>;
+  dropOnDeath: (playerName: string, floor: 2 | 3, x: number, z: number) => Promise<number>;
 }
 
 export const SHOP_PRICES: Record<ShopItemId, number> = {
@@ -132,11 +132,12 @@ export const useEconomyStore = create<EconomyState>((set,get)=>({
   openShop:()=>set({shopOpen:true}),
   closeShop:()=>set({shopOpen:false}),
 
-  dropOnDeath: async (playerName,x,z) => {
+  dropOnDeath: async (playerName,floor,x,z) => {
     const { data } = await supabase.rpc('drop_mooncakes_on_death',{
       p_room:MULTIPLAYER_ROOM_ID,
       p_player:MULTIPLAYER_PLAYER_ID,
       p_name:playerName,
+      p_floor:floor,
       p_x:x,
       p_z:z,
     });
