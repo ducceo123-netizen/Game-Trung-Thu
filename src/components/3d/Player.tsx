@@ -57,6 +57,7 @@ export function Player() {
   const togglePersonalLanternLight = useGameStore((s) => s.togglePersonalLanternLight);
   const attackWithLantern = useGameStore((s) => s.attackWithLantern);
   const isDead = useGameStore((s) => s.isDead);
+  const damageTick = useGameStore((s) => s.damageTick);
   const respawnNonce = useGameStore((s) => s.respawnNonce);
   const currentFloor = useGameStore((s) => s.currentFloor);
   const setCurrentFloor = useGameStore((s) => s.setCurrentFloor);
@@ -86,6 +87,7 @@ export function Player() {
   const cameraPitch = useRef(0.28);
   const lastPositionSync = useRef(0);
   const handledRespawnNonce = useRef(0);
+  const hitShake = useRef(0);
 
   const keys = useRef<KeysState>({
     forward: false,
@@ -220,6 +222,10 @@ export function Player() {
       window.removeEventListener('mousedown', handleMouseDown);
     };
   }, [hasBambooPole, triggerBambooPoke, togglePersonalLanternLight, attackWithLantern]);
+
+  useEffect(() => {
+    if (damageTick > 0) hitShake.current = 0.34;
+  }, [damageTick]);
 
   // Floor transition spawn points + safe respawn at the Lầu 2 entrance.
   useEffect(() => {
@@ -401,6 +407,15 @@ export function Player() {
     const targetCamY = pos.current.y + camHeight;
 
     camera.position.lerp(new THREE.Vector3(targetCamX, targetCamY, targetCamZ), 0.12);
+
+    if (hitShake.current > 0) {
+      hitShake.current = Math.max(0, hitShake.current - delta * 1.8);
+      const intensity = hitShake.current * 0.18;
+      camera.position.x += Math.sin(time * 52) * intensity;
+      camera.position.y += Math.cos(time * 47) * intensity * 0.6;
+      camera.position.z += Math.sin(time * 61) * intensity * 0.7;
+    }
+
     camera.lookAt(pos.current.x, pos.current.y + 1.2, pos.current.z);
 
     // =========================================================
