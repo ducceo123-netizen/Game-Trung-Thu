@@ -105,8 +105,8 @@ export function LanternLightingStage() {
               <torusGeometry args={[0.57, 0.008, 6, 28]} />
               <meshStandardMaterial color="#74562f" roughness={0.95} />
             </mesh>
-            {Array.from({ length: 16 }).map((_, i) => {
-              const a = (i / 16) * Math.PI * 2;
+            {Array.from({ length: 8 }).map((_, i) => {
+              const a = (i / 8) * Math.PI * 2;
               return (
                 <mesh key={i} position={[Math.cos(a) * 0.58, Math.sin(a) * 0.45, 0.18]}>
                   <sphereGeometry args={[0.027, 6, 6]} />
@@ -129,16 +129,16 @@ export function LanternLightingStage() {
               <meshStandardMaterial color="#b91c1c" roughness={0.72} />
             </mesh>
 
-            {lit && <pointLight color="#ffbf47" intensity={4.4} distance={7} decay={2} />}
+
           </group>
         </group>
       )}
 
       {lit && (
         <>
-          <pointLight position={[0, 2.1, 0]} color="#ffd778" intensity={1.8} distance={9} decay={2} />
-          {Array.from({ length: 18 }).map((_, i) => {
-            const a = (i / 18) * Math.PI * 2;
+          <pointLight position={[0, 2.1, 0]} color="#ffd778" intensity={2.2} distance={7} decay={2} />
+          {Array.from({ length: 8 }).map((_, i) => {
+            const a = (i / 8) * Math.PI * 2;
             const r = 1.0 + (i % 3) * 0.24;
             return (
               <mesh key={i} position={[Math.cos(a) * r, 1.0 + (i % 5) * 0.22, Math.sin(a) * r]}>
