@@ -15,6 +15,7 @@ import { EndingSequence } from './components/ui/EndingSequence';
 import { MobileControls } from './components/ui/MobileControls';
 import { LanternWorkshopModal } from './components/ui/LanternWorkshopModal';
 import { GameOverOverlay } from './components/ui/GameOverOverlay';
+import { SocialPostModal } from './components/ui/SocialPostModal';
 import { useGameStore } from './stores/useGameStore';
 
 export default function App() {
@@ -78,6 +79,7 @@ export default function App() {
 
       <LanternWorkshopModal />
       <GameOverOverlay />
+      <SocialPostModal />
 
       {/* Phase 1: Player Name Start Overlay */}
       {gamePhase === 'start_overlay' && <StartOverlay />}
