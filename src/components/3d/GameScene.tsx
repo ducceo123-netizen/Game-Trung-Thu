@@ -45,7 +45,6 @@ export function GameScene() {
                 <Environment />
                 <DIYLanterns />
                 <QuestCollectibles />
-                <WorldMooncakes />
                 <SecurityGuardNPC position={[2.2, 0, 12]} />
                 <AnhKhoeNPC />
                 <ItemShop />
@@ -58,6 +57,9 @@ export function GameScene() {
                 <BooGhost />
               </>
             )}
+
+            {/* Shared currency drops can exist on either floor */}
+            <WorldMooncakes />
 
             {/* Realtime remote players + local player persist while changing floors */}
             <MultiplayerPlayers />
