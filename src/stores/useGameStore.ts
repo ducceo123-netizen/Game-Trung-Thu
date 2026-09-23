@@ -339,7 +339,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     get().showAchievement({
       id: 'personal_lantern_built',
       title: 'LỒNG ĐÈN CÁ NHÂN ĐÃ XONG',
-      subtitle: 'Ra quầy và bấm E để THẮP SÁNG lồng đèn của bạn!',
+      subtitle: 'Đã xong! Đi theo bảng → KHU THẮP SÁNG và bấm E để bật đèn.',
     });
   },
   lightPersonalLantern: () => {
@@ -349,7 +349,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     get().showAchievement({
       id: 'personal_lantern_lit',
       title: 'THẮP ĐÈN THÀNH CÔNG ✨',
-      subtitle: 'Lồng đèn của bạn đã sáng. Trung Thu lên đèn!',
+      subtitle: 'Lồng đèn của bạn đã sáng tại khu showcase UID Gò Dầu! ✨',
     });
   },
 }));
