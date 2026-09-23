@@ -10,6 +10,8 @@ export type CombatAttackPayload = {
   z: number;
   rotationY: number;
   damage: number;
+  range: number;
+  weapon: 'lantern' | 'sword' | 'blaster';
   createdAt: number;
 };
 
