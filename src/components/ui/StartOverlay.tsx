@@ -48,7 +48,7 @@ export function StartOverlay() {
               Phiên bản: Build 15.08.PROD (Hotfix lúc 23:45)
             </p>
             <p className="text-xs text-blue-800 mt-1 font-mono font-bold">
-              📍 ĐỊA ĐIỂM: LẦU 2 • VĂN PHÒNG GÒ DẦU
+              📍 ĐIỂM BẮT ĐẦU: LẦU 1 • SẢNH UID GÒ DẦU
             </p>
           </div>
 
@@ -56,8 +56,8 @@ export function StartOverlay() {
           <div className="bg-white border-2 border-inset border-slate-600 p-3 text-xs leading-relaxed text-slate-800 mb-6 font-mono">
             <p className="font-bold text-red-600 mb-1">UID GÒ DẦU • HỘI THI LỒNG ĐÈN THỦ CÔNG:</p>
             <p>
-              BTC đã giấu 3 bánh Trung Thu bí mật ở Lầu 2. Mỗi bánh chứa một vé máy bay nội địa trị giá 3.000.000đ.
-              Bạn có thể up ảnh làm lồng đèn riêng, cầm đi vòng vòng và bật sáng. Cầu thang lên Lầu 3 đã mở — nhưng Boo có thể xuất hiện bất kỳ lúc nào.
+              Bạn bắt đầu ở Lầu 1, gặp Chú Bảnh trước rồi mới được lên Lầu 2. Từ sảnh có thể nhìn thẳng ra đường Gò Dầu kiểu Việt Nam.
+              Trên Lầu 2, BTC giấu bánh Trung Thu, có workshop làm lồng đèn, social screen, whiteboard chung và tiệm vật phẩm. Lầu 3 vẫn có Boo.
             </p>
           </div>
 
