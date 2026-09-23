@@ -47,6 +47,9 @@ export function StartOverlay() {
             <p className="text-xs text-slate-600 mt-2 font-mono">
               Phiên bản: Build 15.08.PROD (Hotfix lúc 23:45)
             </p>
+            <p className="text-xs text-blue-800 mt-1 font-mono font-bold">
+              📍 ĐỊA ĐIỂM: LẦU 4 • VĂN PHÒNG GÒ DẦU
+            </p>
           </div>
 
           {/* Lore description box */}
