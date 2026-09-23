@@ -2,13 +2,17 @@ import { useEffect } from 'react';
 import { Text } from '@react-three/drei';
 import { MULTIPLAYER_ROOM_ID, supabase } from '../../lib/supabase';
 import { useEconomyStore } from '../../stores/useEconomyStore';
+import { useGameStore } from '../../stores/useGameStore';
 
 export function WorldMooncakes() {
   const cakes = useEconomyStore((s)=>s.worldMooncakes);
   const refresh = useEconomyStore((s)=>s.refreshMooncakes);
   const spawnTick = useEconomyStore((s)=>s.spawnMooncakeTick);
+  const initEconomy = useEconomyStore((s)=>s.initEconomy);
+  const playerName = useGameStore((s)=>s.playerName);
 
   useEffect(()=>{
+    void initEconomy(playerName);
     void spawnTick();
     const spawnTimer=window.setInterval(()=>void spawnTick(),8500);
     const channel=supabase
@@ -25,7 +29,7 @@ export function WorldMooncakes() {
       window.clearInterval(spawnTimer);
       void supabase.removeChannel(channel);
     };
-  },[refresh,spawnTick]);
+  },[refresh,spawnTick,initEconomy,playerName]);
 
   return (
     <group>
