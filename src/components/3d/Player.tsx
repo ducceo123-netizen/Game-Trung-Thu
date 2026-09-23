@@ -35,6 +35,7 @@ export function Player() {
   const startDialogue = useGameStore((s) => s.startDialogue);
   const activeDialogue = useGameStore((s) => s.activeDialogue);
   const setInteractionPrompt = useGameStore((s) => s.setInteractionPrompt);
+  const workshopOpen = useGameStore((s) => s.workshopOpen);
   const openWorkshop = useGameStore((s) => s.openWorkshop);
   const personalLanternBuilt = useGameStore((s) => s.personalLanternBuilt);
   const personalLanternLit = useGameStore((s) => s.personalLanternLit);
@@ -214,6 +215,7 @@ export function Player() {
 
   useFrame((state, delta) => {
     if (gamePhase !== 'playing') return;
+    if (workshopOpen) return;
 
     // Movement calculation
     let moveSpeed = 4.2;
