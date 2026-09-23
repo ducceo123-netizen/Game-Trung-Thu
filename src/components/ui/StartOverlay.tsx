@@ -42,7 +42,7 @@ export function StartOverlay() {
               </h1>
             </div>
             <p className="text-base sm:text-lg font-bold text-red-700 italic mt-1 font-mono">
-              “Một đêm Trung Thu không được QA.”
+              “Lầu 4 chưa lên đèn thì chưa ai được về.”
             </p>
             <p className="text-xs text-slate-600 mt-2 font-mono">
               Phiên bản: Build 15.08.PROD (Hotfix lúc 23:45)
@@ -56,8 +56,8 @@ export function StartOverlay() {
           <div className="bg-white border-2 border-inset border-slate-600 p-3 text-xs leading-relaxed text-slate-800 mb-6 font-mono">
             <p className="font-bold text-red-600 mb-1">UID GÒ DẦU • HỘI THI LỒNG ĐÈN THỦ CÔNG:</p>
             <p>
-              Lầu 4 đã biến thành xưởng Trung Thu: bàn làm việc, chai nước, hộp thuốc, bao bì và dây LED đều có nguy cơ thành lồng đèn.
-              Và tất nhiên, có ai đó vừa cắm nồi lẩu điện vào trạm nguồn khiến Mặt Trăng sập kết nối.
+              Còn ít phút nữa tới giờ chấm lồng đèn. BTC vẫn thiếu đồ setup, các team đang chạy quanh Lầu 4 tìm ổ cắm, súng keo và remote LED.
+              Mỗi người có thể góp sức: tìm đồ, làm một lồng đèn từ ảnh team rồi mang ra khu showcase thắp sáng.
             </p>
           </div>
 
