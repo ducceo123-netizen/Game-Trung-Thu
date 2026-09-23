@@ -1,0 +1,6 @@
+{
+  "name": "RẰM.exe - Một đêm Trung Thu không được QA",
+  "description": "Game 3D hài hước Trung Thu công sở: Khôi phục máy chủ Mặt Trăng bằng cây tre và lồng đèn ve chai công nghệ.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
