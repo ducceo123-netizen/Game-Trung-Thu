@@ -72,6 +72,12 @@ interface GameState {
   lastTypedKeys: string;
   systemMessage: string;
 
+  // Personal lantern workshop
+  workshopOpen: boolean;
+  personalLanternImage: string | null;
+  personalLanternBuilt: boolean;
+  personalLanternLit: boolean;
+
   // Actions
   setPlayerName: (name: string) => void;
   setGamePhase: (phase: GamePhase) => void;
@@ -97,6 +103,11 @@ interface GameState {
   printOfficePaper: () => void;
   interactRabbit: () => string;
   cycleSystemMessage: () => void;
+  openWorkshop: () => void;
+  closeWorkshop: () => void;
+  setPersonalLanternImage: (image: string | null) => void;
+  buildPersonalLantern: () => void;
+  lightPersonalLantern: () => void;
 }
 
 let achievementTimer: ReturnType<typeof setTimeout> | null = null;
@@ -127,6 +138,11 @@ export const useGameStore = create<GameState>((set, get) => ({
   printerJobCount: 0,
   lastTypedKeys: '',
   systemMessage: 'Hệ thống chuẩn bị vào ca trực đêm...',
+
+  workshopOpen: false,
+  personalLanternImage: null,
+  personalLanternBuilt: false,
+  personalLanternLit: false,
 
   setPlayerName: (name: string) => set({ playerName: name.trim() || 'Dev Quèn' }),
   setGamePhase: (phase: GamePhase) => set({ gamePhase: phase }),
@@ -310,5 +326,30 @@ export const useGameStore = create<GameState>((set, get) => ({
   cycleSystemMessage: () => {
     const pick = RANDOM_SYSTEM_MESSAGES[Math.floor(Math.random() * RANDOM_SYSTEM_MESSAGES.length)];
     set({ systemMessage: pick });
+  },
+
+  openWorkshop: () => set({ workshopOpen: true }),
+  closeWorkshop: () => set({ workshopOpen: false }),
+  setPersonalLanternImage: (image: string | null) =>
+    set({ personalLanternImage: image, personalLanternBuilt: false, personalLanternLit: false }),
+  buildPersonalLantern: () => {
+    if (!get().personalLanternImage) return;
+    sounds.playAchievement();
+    set({ personalLanternBuilt: true, personalLanternLit: false });
+    get().showAchievement({
+      id: 'personal_lantern_built',
+      title: 'LỒNG ĐÈN CÁ NHÂN ĐÃ XONG',
+      subtitle: 'Ra quầy và bấm E để THẮP SÁNG lồng đèn của bạn!',
+    });
+  },
+  lightPersonalLantern: () => {
+    if (!get().personalLanternBuilt) return;
+    sounds.playAchievement();
+    set({ personalLanternLit: true });
+    get().showAchievement({
+      id: 'personal_lantern_lit',
+      title: 'THẮP ĐÈN THÀNH CÔNG ✨',
+      subtitle: 'Lồng đèn của bạn đã sáng. Trung Thu lên đèn!',
+    });
   },
 }));
