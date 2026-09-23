@@ -8,8 +8,11 @@ export function PlayerLantern() {
   const equipped = useGameStore((s) => s.playerHasLanternEquipped);
   const lit = useGameStore((s) => s.personalLanternLit);
   const shape = useGameStore((s) => s.personalLanternShapeMode);
+  const carryRef = useRef<THREE.Group>(null);
   const swingRef = useRef<THREE.Group>(null);
+  const attackProgress = useRef(0);
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
+  const attackTrigger = useGameStore((s) => s.lanternAttackTrigger);
 
   useEffect(() => {
     if (!imageData) {
@@ -38,11 +41,28 @@ export function PlayerLantern() {
     };
   }, [imageData]);
 
-  useFrame((state) => {
-    if (!swingRef.current) return;
+  useEffect(() => {
+    if (attackTrigger > 0) attackProgress.current = 1;
+  }, [attackTrigger]);
+
+  useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
-    swingRef.current.rotation.z = Math.sin(t * 4.2) * 0.055;
-    swingRef.current.rotation.x = Math.cos(t * 3.2) * 0.025;
+    if (swingRef.current) {
+      swingRef.current.rotation.z = Math.sin(t * 4.2) * 0.055;
+      swingRef.current.rotation.x = Math.cos(t * 3.2) * 0.025;
+    }
+
+    if (carryRef.current) {
+      if (attackProgress.current > 0) {
+        attackProgress.current = Math.max(0, attackProgress.current - delta * 4.2);
+        const swing = Math.sin((1 - attackProgress.current) * Math.PI);
+        carryRef.current.rotation.y = -0.55 + swing * 1.7;
+        carryRef.current.rotation.z = -swing * 0.45;
+      } else {
+        carryRef.current.rotation.y = 0;
+        carryRef.current.rotation.z = 0;
+      }
+    }
   });
 
   if (!equipped || !imageData) return null;
@@ -58,7 +78,7 @@ export function PlayerLantern() {
     [0.56, 0.56];
 
   return (
-    <group position={[0.48, 0.72, 0.12]}>
+    <group ref={carryRef} position={[0.48, 0.72, 0.12]}>
       {/* bamboo handle */}
       <mesh position={[0.14, 0.48, 0]} rotation={[0, 0, -0.45]}>
         <cylinderGeometry args={[0.016, 0.021, 1.35, 7]} />
