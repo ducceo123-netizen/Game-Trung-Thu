@@ -103,6 +103,50 @@ class SoundSynth {
     } catch {}
   }
 
+  // Toy blaster shot: sharp click + short electronic crack.
+  public playGunshot() {
+    if (this.isMuted) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+
+      const osc = this.ctx.createOscillator();
+      const oscGain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(920, now);
+      osc.frequency.exponentialRampToValueAtTime(160, now + 0.09);
+      oscGain.gain.setValueAtTime(0.2, now);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(oscGain);
+      oscGain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.11);
+
+      const size = Math.floor(this.ctx.sampleRate * 0.08);
+      const buffer = this.ctx.createBuffer(1, size, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < size; i++) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / size);
+      }
+
+      const noise = this.ctx.createBufferSource();
+      const filter = this.ctx.createBiquadFilter();
+      const noiseGain = this.ctx.createGain();
+      noise.buffer = buffer;
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(1100, now);
+      noiseGain.gain.setValueAtTime(0.12, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      noise.connect(filter);
+      filter.connect(noiseGain);
+      noiseGain.connect(this.ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.08);
+    } catch {}
+  }
+
   // Electric spark / outage zap
   public playZap() {
     if (this.isMuted) return;
