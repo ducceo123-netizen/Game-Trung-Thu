@@ -216,29 +216,30 @@ export function Player() {
     if (keys.current.run) moveSpeed = 7.0;
     if (isSlowed) moveSpeed = 1.6; // Salonpas slow
 
-    let moveX = 0;
-    let moveZ = 0;
-
-    if (keys.current.forward) moveZ -= 1;
-    if (keys.current.backward) moveZ += 1;
-    if (keys.current.left) moveX -= 1;
-    if (keys.current.right) moveX += 1;
-
-    const isMoving = moveX !== 0 || moveZ !== 0;
+    const forwardInput = (keys.current.forward ? 1 : 0) - (keys.current.backward ? 1 : 0);
+    const strafeInput = (keys.current.right ? 1 : 0) - (keys.current.left ? 1 : 0);
+    const isMoving = forwardInput !== 0 || strafeInput !== 0;
 
     if (isMoving) {
-      const length = Math.sqrt(moveX * moveX + moveZ * moveZ);
-      moveX /= length;
-      moveZ /= length;
+      // Standard third-person camera-relative movement:
+      // W always moves toward screen/camera forward, D always moves screen-right.
+      const forwardVec = new THREE.Vector3();
+      camera.getWorldDirection(forwardVec);
+      forwardVec.y = 0;
 
-      // Transform direction relative to camera angle
-      const forwardVec = new THREE.Vector3(Math.sin(cameraYaw.current), 0, Math.cos(cameraYaw.current));
-      const rightVec = new THREE.Vector3(Math.cos(cameraYaw.current), 0, -Math.sin(cameraYaw.current));
+      if (forwardVec.lengthSq() < 0.0001) {
+        forwardVec.set(Math.sin(cameraYaw.current), 0, Math.cos(cameraYaw.current));
+      } else {
+        forwardVec.normalize();
+      }
+
+      const rightVec = new THREE.Vector3().crossVectors(forwardVec, camera.up).normalize();
 
       const dir = new THREE.Vector3()
-        .addScaledVector(forwardVec, moveZ)
-        .addScaledVector(rightVec, moveX)
-        .normalize();
+        .addScaledVector(forwardVec, forwardInput)
+        .addScaledVector(rightVec, strafeInput);
+
+      if (dir.lengthSq() > 1) dir.normalize();
 
       pos.current.x += dir.x * moveSpeed * delta;
       pos.current.z += dir.z * moveSpeed * delta;
