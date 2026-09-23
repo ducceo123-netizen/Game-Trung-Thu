@@ -11,7 +11,7 @@ import { useEconomyStore, type ShopItemId } from '../../stores/useEconomyStore';
 type RemotePlayerState = {
   id: string;
   name: string;
-  floor: 2 | 3;
+  floor: 1 | 2 | 3;
   x: number;
   y: number;
   z: number;
@@ -349,7 +349,7 @@ export function MultiplayerPlayers() {
         next[key] = {
           id: key,
           name: String(meta.name ?? 'UID Player'),
-          floor: Number(meta.floor) === 3 ? 3 : 2,
+          floor: Number(meta.floor) === 1 ? 1 : Number(meta.floor) === 3 ? 3 : 2,
           x: Number(meta.x ?? 0),
           y: Number(meta.y ?? 0.5),
           z: Number(meta.z ?? 0),
@@ -396,7 +396,7 @@ export function MultiplayerPlayers() {
             y: Number(p.y ?? existing.y),
             z: Number(p.z ?? existing.z),
             rotationY: Number(p.rotationY ?? existing.rotationY),
-            floor: Number(p.floor) === 3 ? 3 : 2,
+            floor: Number(p.floor) === 1 ? 1 : Number(p.floor) === 3 ? 3 : 2,
           },
         };
       });
@@ -432,7 +432,7 @@ export function MultiplayerPlayers() {
             ...existing,
             ...p,
             id: p.id!,
-            floor: Number(p.floor ?? existing.floor) === 3 ? 3 : 2,
+            floor: Number(p.floor ?? existing.floor) === 1 ? 1 : Number(p.floor ?? existing.floor) === 3 ? 3 : 2,
             lanternShape: (p.lanternShape as LanternShapeMode) ?? existing.lanternShape,
             health: Number(p.health ?? existing.health),
             isDead: Boolean(p.isDead ?? existing.isDead),
