@@ -339,10 +339,10 @@ export function Player() {
             startDialogue({
               speaker: 'CHÚ BẢO VỆ',
               lines: [
-                '“Anh không biết chuyện gì vừa xảy ra...”',
-                '“Có đứa phòng Thiết Kế vừa cắm nồi lẩu cá thác lác vào ổ điện trạm phát trăng.”',
-                '“Cả hệ thống sập nguồn rồi. Nhưng hình như công ty còn đúng một cây tre.”',
-                '“Cầm lấy đi! Dùng nó mà khều lồng đèn với giải cứu Trung Thu!”',
+                '“Ê, còn chút nữa là tới giờ chấm lồng đèn rồi.”',
+                '“BTC đang thiếu đúng 3 món để set up khu thắp sáng: ổ cắm, súng keo và remote LED.”',
+                '“Mấy team chạy tứ tung ở Lầu 4, ai gom nhanh thì về workshop làm đèn trước.”',
+                '“Cầm cây tre này đi. Vừa tìm đồ, vừa chọc thử mấy cái lồng đèn bựa quanh văn phòng cho vui.”',
               ],
               currentLineIndex: 0,
               onComplete: () => {
@@ -353,8 +353,9 @@ export function Player() {
             startDialogue({
               speaker: 'CHÚ BẢO VỆ',
               lines: [
-                '“Cây tre xịn đấy! Đi gom đủ 3 món linh kiện rồi về trạm phát trăng khởi động lại server!”',
-                '“Nhớ cẩn thận mấy cái lồng đèn tự chế của tụi Dev, dị lắm!”',
+                '“Có tre rồi thì chạy đi gom đủ 3 món setup nha.”',
+                '“Xong ghé Workshop UID, up ảnh team làm lồng đèn rồi mang ra khu thắp sáng.”',
+                '“Nhiều người chơi thì chia nhau tìm mỗi người một món cho lẹ!”',
               ],
               currentLineIndex: 0,
             });
@@ -557,27 +558,42 @@ export function Player() {
           <meshStandardMaterial color="#dc2626" roughness={0.4} />
         </mesh>
 
-        {/* Torso / Developer Hoodie */}
+        {/* UID team shirt: dark navy tee with small UID chest mark */}
         <mesh position={[0, 0.65, 0]} castShadow>
-          <boxGeometry args={[0.48, 0.48, 0.28]} />
-          <meshStandardMaterial color={isBeautyMode ? '#ec4899' : '#0284c7'} roughness={0.5} />
+          <boxGeometry args={[0.5, 0.48, 0.28]} />
+          <meshStandardMaterial color={isBeautyMode ? '#ec4899' : '#111827'} roughness={0.62} />
         </mesh>
-        {/* Hoodie pocket */}
-        <mesh position={[0, 0.56, 0.15]}>
-          <boxGeometry args={[0.28, 0.15, 0.02]} />
-          <meshStandardMaterial color="#0369a1" />
+        {/* subtle collar */}
+        <mesh position={[0, 0.87, 0.145]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.105, 0.018, 6, 14, Math.PI]} />
+          <meshStandardMaterial color="#0b1220" roughness={0.7} />
+        </mesh>
+        {/* UID logo on left chest */}
+        <Text
+          position={[-0.105, 0.72, 0.151]}
+          fontSize={0.09}
+          color="#eaf6ff"
+          anchorX="center"
+          anchorY="middle"
+          fontWeight="bold"
+        >
+          UID
+        </Text>
+        <mesh position={[-0.105, 0.645, 0.152]}>
+          <boxGeometry args={[0.13, 0.018, 0.008]} />
+          <meshStandardMaterial color="#2aa7d6" emissive="#0e7490" emissiveIntensity={0.3} />
         </mesh>
 
         {/* Left Arm */}
         <mesh position={[-0.32, 0.62, 0]} castShadow>
           <boxGeometry args={[0.14, 0.42, 0.15]} />
-          <meshStandardMaterial color="#0284c7" />
+          <meshStandardMaterial color={isBeautyMode ? '#ec4899' : '#111827'} roughness={0.62} />
         </mesh>
 
         {/* Right Arm (Holding bamboo pole) */}
         <mesh position={[0.32, 0.62, 0]} castShadow>
           <boxGeometry args={[0.14, 0.42, 0.15]} />
-          <meshStandardMaterial color="#0284c7" />
+          <meshStandardMaterial color={isBeautyMode ? '#ec4899' : '#111827'} roughness={0.62} />
         </mesh>
 
         {/* --- THE SIGNATURE BAMBOO POLE WITH HOOK TIP --- */}
