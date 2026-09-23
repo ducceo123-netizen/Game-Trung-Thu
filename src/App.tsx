@@ -18,6 +18,7 @@ import { GameOverOverlay } from './components/ui/GameOverOverlay';
 import { SocialPostModal } from './components/ui/SocialPostModal';
 import { ItemShopModal } from './components/ui/ItemShopModal';
 import { CombatHitOverlay } from './components/ui/CombatHitOverlay';
+import { SocialChatModal } from './components/ui/SocialChatModal';
 import { useGameStore } from './stores/useGameStore';
 
 export default function App() {
@@ -72,6 +73,8 @@ export default function App() {
                   <span className="text-cyan-300">Đánh bằng lồng đèn</span>
                   <span>Di chuột:</span>
                   <span className="text-cyan-300">Xoay hướng realtime</span>
+                  <span>Phím T:</span>
+                  <span className="text-cyan-300">Nói chuyện / thả meme gần đây</span>
                 </div>
               </div>
             )}
@@ -84,6 +87,7 @@ export default function App() {
       <SocialPostModal />
       <ItemShopModal />
       <CombatHitOverlay />
+      <SocialChatModal />
 
       {/* Phase 1: Player Name Start Overlay */}
       {gamePhase === 'start_overlay' && <StartOverlay />}
