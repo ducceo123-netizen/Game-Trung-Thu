@@ -71,7 +71,7 @@ export function RetroHUD() {
 
           <div className="bg-slate-950/85 border border-cyan-700/60 px-2.5 py-1.5 rounded text-[11px] font-mono text-cyan-100 max-w-xs">
             <div className="font-bold text-cyan-300">📍 LẦU HIỆN TẠI: LẦU {currentFloor}</div>
-            <div>{currentFloor === 2 ? 'Văn phòng Gò Dầu • Trung Thu UID' : 'Halloween Zone • tìm đường về cầu thang'}</div>
+            <div>{currentFloor === 1 ? 'Sảnh UID • nhìn ra đường Gò Dầu' : currentFloor === 2 ? 'Văn phòng Gò Dầu • Trung Thu UID' : 'Halloween Zone • tìm đường về cầu thang'}</div>
           </div>
         </div>
 
