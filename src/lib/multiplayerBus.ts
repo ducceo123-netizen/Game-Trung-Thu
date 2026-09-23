@@ -4,7 +4,7 @@ export type SocialChatPayload = {
   id: string;
   playerId: string;
   playerName: string;
-  floor: 2 | 3;
+  floor: 1 | 2 | 3;
   x: number;
   y: number;
   z: number;
