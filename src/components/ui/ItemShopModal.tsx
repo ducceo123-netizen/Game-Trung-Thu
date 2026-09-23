@@ -16,7 +16,10 @@ export function ItemShopModal() {
   const equipped=useEconomyStore((s)=>s.equippedItem);
   const buy=useEconomyStore((s)=>s.purchaseItem);
   const equip=useEconomyStore((s)=>s.equipItem);
+  const dropItem=useEconomyStore((s)=>s.dropItem);
   const name=useGameStore((s)=>s.playerName);
+  const floor=useGameStore((s)=>s.currentFloor);
+  const position=useGameStore((s)=>s.playerPosition);
   const show=useGameStore((s)=>s.showAchievement);
   const [busyItem,setBusyItem]=useState<ShopItemId|null>(null);
   const [status,setStatus]=useState('');
@@ -74,14 +77,37 @@ export function ItemShopModal() {
                     }
                   }}
                 >{busyItem===item.id?'ĐANG MUA...':'MUA'}</button>:
-                <button
-                  type="button"
-                  className={'w-full py-2 font-black '+(isEquipped?'bg-emerald-500 text-slate-950':'bg-cyan-700')}
-                  onClick={()=>{
-                    equip(isEquipped?null:item.id);
-                    setStatus(isEquipped?`Đã bỏ equip ${item.name}.`:`Đã equip ${item.name}.`);
-                  }}
-                >{isEquipped?'BỎ EQUIP':'EQUIP'}</button>}
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    className={'w-full py-2 font-black '+(isEquipped?'bg-emerald-500 text-slate-950':'bg-cyan-700')}
+                    onClick={()=>{
+                      equip(isEquipped?null:item.id);
+                      setStatus(isEquipped?`Đã bỏ equip ${item.name}.`:`Đã equip ${item.name}.`);
+                    }}
+                  >{isEquipped?'BỎ EQUIP':'EQUIP'}</button>
+                  <button
+                    type="button"
+                    disabled={busyItem!==null}
+                    className="w-full border border-red-700 bg-red-950 py-2 text-xs font-black text-red-200 disabled:opacity-50"
+                    onClick={async()=>{
+                      setBusyItem(item.id);
+                      setStatus(`Đang bỏ ${item.name} xuống đất...`);
+                      try{
+                        const r=await dropItem(item.id,name,floor,position[0],position[2]);
+                        const message=r.ok
+                          ? `Đã bỏ ${item.name} xuống đất. Người khác có thể nhặt bằng E.`
+                          : 'Không bỏ được vật phẩm này.';
+                        setStatus(message);
+                        show({id:'drop_item',title:r.ok?'📦 ĐÃ BỎ VẬT PHẨM':'KHÔNG BỎ ĐƯỢC',subtitle:message});
+                      }finally{
+                        setBusyItem(null);
+                      }
+                    }}
+                  >
+                    📦 BỎ RA ĐẤT
+                  </button>
+                </div>
               </div>;
             })}
           </div>
