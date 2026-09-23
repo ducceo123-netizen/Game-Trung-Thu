@@ -10,6 +10,7 @@ export function WorldMooncakes() {
   const spawnTick = useEconomyStore((s)=>s.spawnMooncakeTick);
   const initEconomy = useEconomyStore((s)=>s.initEconomy);
   const playerName = useGameStore((s)=>s.playerName);
+  const currentFloor = useGameStore((s)=>s.currentFloor);
 
   useEffect(()=>{
     void initEconomy(playerName);
@@ -33,7 +34,7 @@ export function WorldMooncakes() {
 
   return (
     <group>
-      {cakes.map((cake)=>(
+      {cakes.filter((cake)=>cake.floor===currentFloor).map((cake)=>(
         <group key={cake.id} position={[cake.x,0.42,cake.z]}>
           <mesh rotation={[0,Math.PI/4,0]}>
             <cylinderGeometry args={[0.22,0.22,0.13,12]} />
