@@ -57,10 +57,11 @@ export const useEconomyStore = create<EconomyState>((set,get)=>({
       p_name: playerName,
     });
     if (!error && data) {
+      const row = Array.isArray(data) ? data[0] : data;
       set({
-        balance: Number(data.balance ?? 0),
-        purchasedItems: (data.purchased_items ?? []) as ShopItemId[],
-        khoeClaimed: Boolean(data.claimed_khoe),
+        balance: Number(row?.balance ?? 0),
+        purchasedItems: (row?.purchased_items ?? []) as ShopItemId[],
+        khoeClaimed: Boolean(row?.claimed_khoe),
         initialized: true,
       });
     }
