@@ -27,10 +27,11 @@ function WarmFairyLights({ radiusX = 0.46, radiusY = 0.38, z = 0.2, count = 14 }
   z?: number;
   count?: number;
 }) {
-  const pts = useMemo(() => Array.from({ length: count }, (_, i) => {
-    const a = (i / count) * Math.PI * 2;
+  const actualCount = Math.min(count, 8);
+  const pts = useMemo(() => Array.from({ length: actualCount }, (_, i) => {
+    const a = (i / actualCount) * Math.PI * 2;
     return [Math.cos(a) * radiusX, Math.sin(a) * radiusY, z + Math.sin(a * 2) * 0.025] as V3;
-  }), [radiusX, radiusY, z, count]);
+  }), [radiusX, radiusY, z, actualCount]);
 
   return (
     <group>
@@ -102,7 +103,6 @@ function BaseLantern({
       </mesh>
       <group ref={payload}>
         {children}
-        <pointLight color={color} intensity={0.75} distance={3.6} decay={2} />
         <Text
           position={[0, 1.05, 0]}
           fontSize={0.095}
@@ -235,7 +235,7 @@ export function SatoriBottleLantern({ position }: { position: V3 }) {
       <group position={[0, y.current, 0]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.25, 0.25, 1.08, 16]} />
-          <meshPhysicalMaterial color="#dbeffc" transmission={0.78} transparent opacity={0.68} roughness={0.12} />
+          <meshStandardMaterial color="#cfe9f5" transparent opacity={0.58} roughness={0.28} depthWrite={false} />
         </mesh>
         <mesh position={[0, 0.58, 0]}>
           <cylinderGeometry args={[0.09, 0.11, 0.15, 12]} />
@@ -261,7 +261,7 @@ export function HerbalJarLantern({ position }: { position: V3 }) {
       <group rotation={[0, 0.05, -0.02]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.42, 0.38, 0.78, 18]} />
-          <meshPhysicalMaterial color="#9aae63" transparent opacity={0.72} roughness={0.25} transmission={0.3} />
+          <meshStandardMaterial color="#8ea45f" transparent opacity={0.68} roughness={0.35} depthWrite={false} />
         </mesh>
         <mesh position={[0, 0.46, 0]}>
           <cylinderGeometry args={[0.43, 0.43, 0.16, 18]} />
@@ -372,20 +372,7 @@ export function BeautyLantern({ position }: { position: V3 }) {
 }
 
 export function KeyboardLantern({ position }: { position: V3 }) {
-  const keysRef = useRef<THREE.Group>(null);
   const typed = useGameStore((s) => s.lastTypedKeys);
-  useFrame((state) => {
-    if (!keysRef.current) return;
-    keysRef.current.children.forEach((child, i) => {
-      const mesh = child as THREE.Mesh;
-      const mat = mesh.material as THREE.MeshStandardMaterial;
-      if (mat?.color) {
-        const hue = (state.clock.elapsedTime * 0.24 + i * 0.055) % 1;
-        mat.color.setHSL(hue, 0.7, 0.55);
-        mat.emissive.setHSL(hue, 0.75, 0.25);
-      }
-    });
-  });
   return (
     <BaseLantern position={position} name="BÀN PHÍM RGB" color="#55d8ff">
       <group rotation={[0.02, 0.05, 0]}>
@@ -393,14 +380,14 @@ export function KeyboardLantern({ position }: { position: V3 }) {
           <boxGeometry args={[0.78, 1.02, 0.12]} />
           <meshStandardMaterial color="#22252a" roughness={0.45} metalness={0.45} />
         </mesh>
-        <group ref={keysRef} position={[0, 0.03, 0.08]}>
+        <group position={[0, 0.03, 0.08]}>
           {Array.from({length: 24}).map((_,i) => {
             const row=Math.floor(i/4);
             const col=i%4;
             return (
               <mesh key={i} position={[(col-1.5)*0.15,(row-2.5)*0.145,0]}>
                 <boxGeometry args={[0.115,0.11,0.038]} />
-                <meshStandardMaterial color="#4f7cff" emissive="#1d4ed8" emissiveIntensity={0.9} roughness={0.35} />
+                <meshStandardMaterial color={i % 3 === 0 ? '#60a5fa' : i % 3 === 1 ? '#a78bfa' : '#22d3ee'} emissive="#164e63" emissiveIntensity={0.35} roughness={0.42} />
               </mesh>
             );
           })}
