@@ -8,6 +8,7 @@ import { QuestCollectibles } from './QuestCollectibles';
 import { SecurityGuardNPC, VacuumRidingRabbit, HidingRabbit } from './NPCs';
 import { MoonServer } from './MoonServer';
 import { Player } from './Player';
+import { LanternWorkshop } from './LanternWorkshop';
 import { useGameStore } from '../../stores/useGameStore';
 
 export function GameScene() {
@@ -70,6 +71,9 @@ export function GameScene() {
             {/* Rabbits (Vacuum riding, Hiding behind boxes) */}
             <VacuumRidingRabbit />
             <HidingRabbit position={[-4.0, 0.5, 11]} />
+
+            {/* Walk-up workshop: upload a photo and turn it into a DIY lantern */}
+            <LanternWorkshop />
 
             {/* The Moon & The Trạm Phát Trăng Machine */}
             <MoonServer />
