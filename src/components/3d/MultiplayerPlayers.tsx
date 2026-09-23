@@ -19,6 +19,7 @@ type RemotePlayerState = {
   lanternLit: boolean;
   lanternShape: LanternShapeMode;
   lanternImage: string | null;
+  lanternText: string;
   health: number;
   isDead: boolean;
 };
@@ -27,10 +28,12 @@ function RemoteLantern({
   imageData,
   lit,
   shape,
+  text,
 }: {
   imageData: string | null;
   lit: boolean;
   shape: LanternShapeMode;
+  text: string;
 }) {
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
 
@@ -99,6 +102,13 @@ function RemoteLantern({
             emissiveIntensity={lit ? 0.2 : 0}
           />
         </mesh>
+        {text.trim() && (
+          <group position={[0,-bodySize[1]*0.18,0.08]}>
+            <mesh><planeGeometry args={[bodySize[0]*0.92,Math.min(0.28,bodySize[1]*0.36)]}/><meshBasicMaterial color="#111827" transparent opacity={0.78}/></mesh>
+            <Text position={[0,0,0.01]} fontSize={0.06} maxWidth={bodySize[0]*0.8} textAlign="center" color="#fff7d6" anchorX="center" anchorY="middle">{text}</Text>
+          </group>
+        )}
+
         <mesh position={[0, -bodySize[1] / 2 - 0.16, 0]}>
           <coneGeometry args={[0.055, 0.22, 7]} />
           <meshStandardMaterial color="#dc2626" roughness={0.85} />
@@ -190,7 +200,7 @@ function RemotePlayerAvatar({ player }: { player: RemotePlayerState }) {
         </Text>
 
         {player.lanternBuilt && !player.isDead && (
-          <RemoteLantern imageData={player.lanternImage} lit={player.lanternLit} shape={player.lanternShape} />
+          <RemoteLantern imageData={player.lanternImage} lit={player.lanternLit} shape={player.lanternShape} text={player.lanternText} />
         )}
       </group>
 
@@ -227,6 +237,7 @@ export function MultiplayerPlayers() {
   const lanternLit = useGameStore((s) => s.personalLanternLit);
   const lanternShape = useGameStore((s) => s.personalLanternShapeMode);
   const lanternImage = useGameStore((s) => s.personalLanternImage);
+  const lanternText = useGameStore((s) => s.personalLanternText);
   const health = useGameStore((s) => s.health);
   const isDead = useGameStore((s) => s.isDead);
   const setOnlineConnected = useGameStore((s) => s.setOnlineConnected);
@@ -273,6 +284,7 @@ export function MultiplayerPlayers() {
           lanternLit: Boolean(meta.lanternLit),
           lanternShape: (meta.lanternShape as LanternShapeMode) ?? 'generic',
           lanternImage: typeof meta.lanternImage === 'string' ? meta.lanternImage : null,
+          lanternText: typeof meta.lanternText === 'string' ? meta.lanternText : '',
           health: Number(meta.health ?? 100),
           isDead: Boolean(meta.isDead),
         };
@@ -328,6 +340,7 @@ export function MultiplayerPlayers() {
           lanternLit: false,
           lanternShape: 'generic',
           lanternImage: null,
+          lanternText: '',
           health: 100,
           isDead: false,
         };
@@ -380,6 +393,7 @@ export function MultiplayerPlayers() {
           lanternLit: s.personalLanternLit,
           lanternShape: s.personalLanternShapeMode,
           lanternImage: s.personalLanternImage,
+          lanternText: s.personalLanternText,
           health: s.health,
           isDead: s.isDead,
         });
@@ -441,6 +455,7 @@ export function MultiplayerPlayers() {
       lanternLit,
       lanternShape,
       lanternImage,
+      lanternText,
       health,
       isDead,
     };
@@ -454,7 +469,7 @@ export function MultiplayerPlayers() {
         ...meta,
       },
     });
-  }, [playerName, currentFloor, lanternBuilt, lanternLit, lanternShape, lanternImage, health, isDead]);
+  }, [playerName, currentFloor, lanternBuilt, lanternLit, lanternShape, lanternImage, lanternText, health, isDead]);
 
   return (
     <>
