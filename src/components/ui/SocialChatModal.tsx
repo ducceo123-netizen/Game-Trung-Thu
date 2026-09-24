@@ -58,6 +58,16 @@ export function SocialChatModal(){
             autoFocus
             value={text}
             onChange={e=>setText(e.target.value.slice(0,120))}
+            onKeyDown={e=>{
+              if(e.key==='Enter' && !e.shiftKey){
+                e.preventDefault();
+                if((text.trim()||meme)&&!busy){
+                  send(text,meme);
+                  setText('');
+                  setMeme(null);
+                }
+              }
+            }}
             placeholder="Gõ gì đó... VD: ai có bánh cho tui xin :))"
             className="h-24 w-full resize-none rounded border border-slate-700 bg-slate-900 p-3 text-sm outline-none focus:border-cyan-400"
           />
