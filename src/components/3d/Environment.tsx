@@ -441,6 +441,192 @@ function StaircaseToFloor3() {
   );
 }
 
+
+function FestivalLantern({ position, color = '#f97316', scale = 1 }: { position: V3; color?: string; scale?: number }) {
+  return (
+    <group position={position} scale={scale}>
+      <mesh>
+        <sphereGeometry args={[0.18, 10, 8]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.8} roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 0.24, 0]}>
+        <cylinderGeometry args={[0.06, 0.06, 0.08, 8]} />
+        <meshStandardMaterial color="#5b2d16" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, -0.25, 0]}>
+        <cylinderGeometry args={[0.012, 0.012, 0.22, 5]} />
+        <meshStandardMaterial color="#facc15" emissive="#f59e0b" emissiveIntensity={0.35} />
+      </mesh>
+    </group>
+  );
+}
+
+function MidAutumnCourtyard() {
+  const lanterns = [
+    [10.8, 2.7, 5.0], [10.8, 2.7, 6.4], [10.8, 2.7, 7.8],
+    [10.8, 2.7, 13.6], [10.8, 2.7, 15.0],
+    [13.0, 3.2, 4.25], [14.6, 3.2, 4.25], [16.2, 3.2, 4.25], [17.8, 3.2, 4.25],
+  ] as V3[];
+
+  return (
+    <group>
+      {/* doorway from UID floor 2 to the outdoor festival courtyard */}
+      <group position={[9.55, 0, 10.9]}>
+        <mesh position={[0, 2.25, -1.75]}>
+          <boxGeometry args={[0.34, 4.5, 0.22]} />
+          <meshStandardMaterial color="#6b3f25" roughness={0.8} />
+        </mesh>
+        <mesh position={[0, 2.25, 1.75]}>
+          <boxGeometry args={[0.34, 4.5, 0.22]} />
+          <meshStandardMaterial color="#6b3f25" roughness={0.8} />
+        </mesh>
+        <mesh position={[0, 4.35, 0]}>
+          <boxGeometry args={[0.34, 0.24, 3.7]} />
+          <meshStandardMaterial color="#6b3f25" roughness={0.8} />
+        </mesh>
+        <Text
+          position={[-0.22, 3.85, 0]}
+          rotation={[0, Math.PI / 2, 0]}
+          fontSize={0.15}
+          color="#fff1c9"
+          anchorX="center"
+          anchorY="middle"
+          fontWeight="bold"
+        >
+          SÂN TRĂNG UID →
+        </Text>
+      </group>
+
+      {/* outdoor deck */}
+      <RigidBody type="fixed" colliders="cuboid" friction={1}>
+        <mesh position={[14.1, -0.11, 10.2]} receiveShadow>
+          <boxGeometry args={[9.0, 0.24, 12.0]} />
+          <meshStandardMaterial color="#c7a878" roughness={0.92} />
+        </mesh>
+      </RigidBody>
+
+      {/* warm edge lighting and low railings */}
+      {[4.35, 15.95].map((z) => (
+        <group key={z}>
+          <mesh position={[14.1, 0.52, z]}>
+            <boxGeometry args={[8.7, 0.12, 0.12]} />
+            <meshStandardMaterial color="#6b3f25" roughness={0.8} />
+          </mesh>
+          <mesh position={[14.1, 0.2, z]}>
+            <boxGeometry args={[8.7, 0.04, 0.06]} />
+            <meshStandardMaterial color="#f59e0b" emissive="#f97316" emissiveIntensity={1.0} />
+          </mesh>
+        </group>
+      ))}
+      <mesh position={[18.45, 0.52, 10.2]}>
+        <boxGeometry args={[0.12, 0.12, 11.5]} />
+        <meshStandardMaterial color="#6b3f25" roughness={0.8} />
+      </mesh>
+
+      {/* moon gate / pavilion */}
+      <group position={[15.2, 0, 9.8]}>
+        {[[-1.65, 0, -1.5], [1.65, 0, -1.5], [-1.65, 0, 1.5], [1.65, 0, 1.5]].map((p, i) => (
+          <mesh key={i} position={[p[0], 1.55, p[2]]} castShadow>
+            <boxGeometry args={[0.18, 3.1, 0.18]} />
+            <meshStandardMaterial color="#7c3f22" roughness={0.78} />
+          </mesh>
+        ))}
+        <mesh position={[0, 3.2, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
+          <cylinderGeometry args={[2.45, 2.45, 0.18, 4]} />
+          <meshStandardMaterial color="#8b3f24" roughness={0.8} />
+        </mesh>
+        <mesh position={[0, 0.18, 0]} receiveShadow>
+          <cylinderGeometry args={[2.15, 2.15, 0.24, 16]} />
+          <meshStandardMaterial color="#b87542" roughness={0.9} />
+        </mesh>
+        <Text position={[0, 2.55, -1.58]} fontSize={0.18} color="#ffe8a3" anchorX="center" anchorY="middle" fontWeight="bold">
+          ĐÊM TRĂNG GÒ DẦU
+        </Text>
+      </group>
+
+      {/* mooncake low table */}
+      <group position={[12.1, 0, 12.8]}>
+        <mesh position={[0, 0.38, 0]} castShadow>
+          <cylinderGeometry args={[0.95, 0.95, 0.28, 20]} />
+          <meshStandardMaterial color="#a65324" roughness={0.8} />
+        </mesh>
+        {[0,1,2,3].map((i) => {
+          const a=i*Math.PI/2;
+          return (
+            <mesh key={i} position={[Math.cos(a)*1.35, 0.22, Math.sin(a)*1.35]} castShadow>
+              <cylinderGeometry args={[0.42, 0.46, 0.34, 12]} />
+              <meshStandardMaterial color="#81512f" roughness={0.85} />
+            </mesh>
+          );
+        })}
+        {[[-0.25,0.6,0], [0.22,0.6,0.08], [0,0.6,-0.25]].map((p,i)=>(
+          <mesh key={i} position={p as V3}>
+            <cylinderGeometry args={[0.16, 0.16, 0.07, 16]} />
+            <meshStandardMaterial color={i===1?'#d97706':'#f59e0b'} roughness={0.75} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* lotus pond */}
+      <group position={[16.8, 0, 13.3]}>
+        <mesh position={[0, 0.04, 0]} rotation={[-Math.PI/2,0,0]}>
+          <circleGeometry args={[1.35, 28]} />
+          <meshStandardMaterial color="#155e75" emissive="#0e7490" emissiveIntensity={0.25} transparent opacity={0.88} />
+        </mesh>
+        {[[-0.55,0.08,-0.2],[0.25,0.08,0.35],[0.55,0.08,-0.45]].map((p,i)=>(
+          <group key={i} position={p as V3}>
+            <mesh rotation={[-Math.PI/2,0,0]}>
+              <circleGeometry args={[0.27, 14]} />
+              <meshStandardMaterial color="#3f7f42" roughness={0.85} />
+            </mesh>
+            <mesh position={[0,0.12,0]}>
+              <sphereGeometry args={[0.12,8,6]} />
+              <meshStandardMaterial color={i===1?'#f9a8d4':'#fde68a'} emissive={i===1?'#db2777':'#f59e0b'} emissiveIntensity={0.45} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* lantern walls */}
+      {lanterns.map((p, i) => (
+        <FestivalLantern key={i} position={p} color={i % 3 === 0 ? '#ef4444' : i % 3 === 1 ? '#f97316' : '#facc15'} scale={0.9} />
+      ))}
+
+      {/* decorative carp silhouette */}
+      <group position={[18.15, 2.25, 7.2]} rotation={[0, -Math.PI/2, 0]}>
+        <mesh>
+          <sphereGeometry args={[0.42, 10, 7]} />
+          <meshStandardMaterial color="#ef4444" emissive="#dc2626" emissiveIntensity={0.4} />
+        </mesh>
+        <mesh position={[-0.48,0,0]} rotation={[0,0,Math.PI/4]}>
+          <coneGeometry args={[0.32,0.7,4]} />
+          <meshStandardMaterial color="#fb7185" emissive="#ef4444" emissiveIntensity={0.25} />
+        </mesh>
+        <mesh position={[0.2,0.08,0.38]}>
+          <sphereGeometry args={[0.05,8,6]} />
+          <meshBasicMaterial color="#fff7ed" />
+        </mesh>
+      </group>
+
+      {/* oversized moon + soft stars beyond the patio */}
+      <mesh position={[18.4, 8.7, 4.5]}>
+        <sphereGeometry args={[2.0, 24, 18]} />
+        <meshStandardMaterial color="#fde68a" emissive="#fbbf24" emissiveIntensity={1.15} roughness={0.95} />
+      </mesh>
+      {Array.from({length:16}).map((_,i)=>(
+        <mesh key={i} position={[11.0 + (i%6)*1.35, 5.8 + (i%4)*0.65, 3.0 + ((i*7)%10)*1.0]}>
+          <sphereGeometry args={[0.025 + (i%3)*0.012, 6, 5]} />
+          <meshBasicMaterial color="#fff7ed" />
+        </mesh>
+      ))}
+
+      <Text position={[14.3, 1.05, 4.48]} rotation={[0,0,0]} fontSize={0.13} color="#7c2d12" anchorX="center" anchorY="middle" fontWeight="bold">
+        SÂN TRĂNG • CHILL • CHECK-IN • NGẮM TRĂNG
+      </Text>
+    </group>
+  );
+}
+
 export function Environment() {
   return (
     <group>
@@ -487,8 +673,13 @@ export function Environment() {
           <boxGeometry args={[0.5, 5.1, 40]} />
           <meshStandardMaterial color={WALL} roughness={0.93} />
         </mesh>
-        <mesh position={[9.75, 2.55, -3.8]} castShadow receiveShadow>
-          <boxGeometry args={[0.5, 5.1, 40]} />
+        {/* right wall is split to leave a real doorway out to the Mid-Autumn courtyard */}
+        <mesh position={[9.75, 2.55, -7.2]} castShadow receiveShadow>
+          <boxGeometry args={[0.5, 5.1, 32.8]} />
+          <meshStandardMaterial color={WALL} roughness={0.93} />
+        </mesh>
+        <mesh position={[9.75, 2.55, 14.25]} castShadow receiveShadow>
+          <boxGeometry args={[0.5, 5.1, 3.2]} />
           <meshStandardMaterial color={WALL} roughness={0.93} />
         </mesh>
         <mesh position={[0, 2.55, -23.55]} castShadow receiveShadow>
@@ -515,6 +706,7 @@ export function Environment() {
       <EventArea />
       <BoothArea />
       <StaircaseToFloor3 />
+      <MidAutumnCourtyard />
 
       <CeilingTrack z={12.3} length={7.5} />
       <CeilingTrack z={8.5} x={-1.5} length={8.0} />
