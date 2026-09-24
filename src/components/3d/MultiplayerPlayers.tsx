@@ -577,6 +577,78 @@ export function MultiplayerPlayers() {
       });
     }, 80);
 
+    const heartbeatDb = async () => {
+      const s = useGameStore.getState();
+      await supabase.rpc('heartbeat_live_player', {
+        p_room: MULTIPLAYER_ROOM_ID,
+        p_player: MULTIPLAYER_PLAYER_ID,
+        p_name: s.playerName,
+        p_floor: s.currentFloor,
+        p_x: s.playerPosition[0],
+        p_y: s.playerPosition[1],
+        p_z: s.playerPosition[2],
+        p_rotation: s.playerRotationY,
+        p_equipped: useEconomyStore.getState().equippedItem,
+        p_health: s.health,
+        p_dead: s.isDead,
+      });
+    };
+
+    const pollLivePlayers = async () => {
+      const cutoff = new Date(Date.now() - 8000).toISOString();
+      const { data } = await supabase
+        .from('live_players')
+        .select('player_id,player_name,floor,x,y,z,rotation_y,equipped_item,health,is_dead,last_seen')
+        .eq('room_id', MULTIPLAYER_ROOM_ID)
+        .gte('last_seen', cutoff);
+
+      if (!data) return;
+
+      setRemotePlayers((prev) => {
+        const next = { ...prev };
+        const seen = new Set<string>();
+
+        for (const row of data) {
+          const id = String(row.player_id);
+          if (!id || id === MULTIPLAYER_PLAYER_ID) continue;
+          seen.add(id);
+          const existing = next[id];
+          next[id] = {
+            id,
+            name: String(row.player_name ?? existing?.name ?? 'UID Player'),
+            floor: Number(row.floor) === 1 ? 1 : Number(row.floor) === 3 ? 3 : 2,
+            x: Number(row.x ?? existing?.x ?? 0),
+            y: Number(row.y ?? existing?.y ?? 0.5),
+            z: Number(row.z ?? existing?.z ?? 0),
+            rotationY: Number(row.rotation_y ?? existing?.rotationY ?? 0),
+            lanternBuilt: existing?.lanternBuilt ?? false,
+            lanternLit: existing?.lanternLit ?? false,
+            lanternShape: existing?.lanternShape ?? 'generic',
+            lanternImage: existing?.lanternImage ?? null,
+            lanternText: existing?.lanternText ?? '',
+            equippedItem: (row.equipped_item as ShopItemId) ?? existing?.equippedItem ?? null,
+            health: Number(row.health ?? existing?.health ?? 100),
+            isDead: Boolean(row.is_dead ?? existing?.isDead ?? false),
+            chatText: existing?.chatText ?? '',
+            chatMeme: existing?.chatMeme ?? null,
+            chatUntil: existing?.chatUntil ?? 0,
+          };
+        }
+
+        for (const id of Object.keys(next)) {
+          if (!seen.has(id) && !Object.values(channel.presenceState()).length) delete next[id];
+        }
+
+        setOnlinePlayerCount(Math.max(1, seen.size + 1));
+        return next;
+      });
+    };
+
+    void heartbeatDb();
+    void pollLivePlayers();
+    const dbHeartbeatTimer = window.setInterval(() => { void heartbeatDb(); }, 1000);
+    const dbPollTimer = window.setInterval(() => { void pollLivePlayers(); }, 1200);
+
     // Presence is a reliable snapshot/fallback when a movement broadcast is missed.
     // Refresh it periodically so newly joined/reconnected clients immediately get
     // a current position instead of an old position from the original join.
@@ -604,6 +676,8 @@ export function MultiplayerPlayers() {
     return () => {
       window.clearInterval(moveTimer);
       window.clearInterval(presenceHeartbeat);
+      window.clearInterval(dbHeartbeatTimer);
+      window.clearInterval(dbPollTimer);
       joinedRef.current = false;
       setOnlineConnected(false);
       setOnlinePlayerCount(1);
