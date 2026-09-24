@@ -371,10 +371,20 @@ export function MultiplayerPlayers() {
       setRemotePlayers((prev) => {
         for (const [id, old] of Object.entries(prev)) {
           if (next[id]) {
-            next[id].x = old.x;
-            next[id].y = old.y;
-            next[id].z = old.z;
-            next[id].rotationY = old.rotationY;
+            const presenceLooksFresh =
+              Math.abs(next[id].x - old.x) > 0.001 ||
+              Math.abs(next[id].y - old.y) > 0.001 ||
+              Math.abs(next[id].z - old.z) > 0.001 ||
+              Math.abs(next[id].rotationY - old.rotationY) > 0.001;
+            if (!presenceLooksFresh) {
+              next[id].x = old.x;
+              next[id].y = old.y;
+              next[id].z = old.z;
+              next[id].rotationY = old.rotationY;
+            }
+            next[id].chatText = old.chatText;
+            next[id].chatMeme = old.chatMeme;
+            next[id].chatUntil = old.chatUntil;
           }
         }
         return next;
@@ -386,8 +396,26 @@ export function MultiplayerPlayers() {
       const p = payload as Partial<RemotePlayerState> & { id?: string };
       if (!p.id || p.id === MULTIPLAYER_PLAYER_ID) return;
       setRemotePlayers((prev) => {
-        const existing = prev[p.id!];
-        if (!existing) return prev;
+        const existing: RemotePlayerState = prev[p.id!] ?? {
+          id: p.id!,
+          name: String(p.name ?? 'UID Player'),
+          floor: Number(p.floor) === 1 ? 1 : Number(p.floor) === 3 ? 3 : 2,
+          x: Number(p.x ?? 0),
+          y: Number(p.y ?? 0.5),
+          z: Number(p.z ?? 0),
+          rotationY: Number(p.rotationY ?? 0),
+          lanternBuilt: false,
+          lanternLit: false,
+          lanternShape: 'generic',
+          lanternImage: null,
+          lanternText: '',
+          equippedItem: null,
+          health: 100,
+          isDead: false,
+          chatText: '',
+          chatMeme: null,
+          chatUntil: 0,
+        };
         return {
           ...prev,
           [p.id!]: {
@@ -526,6 +554,7 @@ export function MultiplayerPlayers() {
       }
 
       if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+        joinedRef.current = false;
         setOnlineConnected(false);
       }
     });
@@ -538,6 +567,7 @@ export function MultiplayerPlayers() {
         event: 'player_move',
         payload: {
           id: MULTIPLAYER_PLAYER_ID,
+          name: s.playerName,
           x: s.playerPosition[0],
           y: s.playerPosition[1],
           z: s.playerPosition[2],
@@ -545,10 +575,35 @@ export function MultiplayerPlayers() {
           floor: s.currentFloor,
         },
       });
-    }, 100);
+    }, 80);
+
+    // Presence is a reliable snapshot/fallback when a movement broadcast is missed.
+    // Refresh it periodically so newly joined/reconnected clients immediately get
+    // a current position instead of an old position from the original join.
+    const presenceHeartbeat = window.setInterval(() => {
+      if (!joinedRef.current) return;
+      const s = useGameStore.getState();
+      void channel.track({
+        name: s.playerName,
+        floor: s.currentFloor,
+        x: s.playerPosition[0],
+        y: s.playerPosition[1],
+        z: s.playerPosition[2],
+        rotationY: s.playerRotationY,
+        lanternBuilt: s.personalLanternBuilt,
+        lanternLit: s.personalLanternLit,
+        lanternShape: s.personalLanternShapeMode,
+        lanternImage: s.personalLanternImage,
+        lanternText: s.personalLanternText,
+        equippedItem: useEconomyStore.getState().equippedItem,
+        health: s.health,
+        isDead: s.isDead,
+      });
+    }, 1000);
 
     return () => {
       window.clearInterval(moveTimer);
+      window.clearInterval(presenceHeartbeat);
       joinedRef.current = false;
       setOnlineConnected(false);
       setOnlinePlayerCount(1);
