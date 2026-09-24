@@ -342,12 +342,24 @@ export function Player() {
     rotationY.current += facingDiff * Math.min(1, delta * 18);
 
     // Bounds for each playable floor.
-    pos.current.x = Math.max(-8.6, Math.min(8.6, pos.current.x));
     if (currentFloor === 1) {
+      pos.current.x = Math.max(-8.6, Math.min(8.6, pos.current.x));
       pos.current.z = Math.max(-8.6, Math.min(11.5, pos.current.z));
     } else if (currentFloor === 2) {
-      pos.current.z = Math.max(-22.8, Math.min(15.2, pos.current.z));
+      // Floor 2 now has a real side-door courtyard on the east side.
+      // Only open the wider X range while the player is aligned with the patio,
+      // so they cannot walk through the office wall anywhere else.
+      const patioLane = pos.current.z >= 4.0 && pos.current.z <= 15.2;
+      const maxX = patioLane ? 18.2 : 8.6;
+      pos.current.x = Math.max(-8.6, Math.min(maxX, pos.current.x));
+
+      if (pos.current.x > 9.1) {
+        pos.current.z = Math.max(4.25, Math.min(15.8, pos.current.z));
+      } else {
+        pos.current.z = Math.max(-22.8, Math.min(15.2, pos.current.z));
+      }
     } else {
+      pos.current.x = Math.max(-8.6, Math.min(8.6, pos.current.x));
       pos.current.z = Math.max(-14.0, Math.min(13.6, pos.current.z));
     }
 
