@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { useWhiteboardStore } from '../../stores/useWhiteboardStore';
@@ -13,12 +13,23 @@ export function CollaborativeWhiteboard(){
 
   useEffect(()=>{void init();},[init]);
 
-  const texture=useMemo(()=>{
-    if(!imageData) return null;
-    const t=new THREE.TextureLoader().load(imageData);
-    t.colorSpace=THREE.SRGBColorSpace;
-    t.minFilter=THREE.LinearFilter;
-    return t;
+  const [texture,setTexture]=useState<THREE.Texture|null>(null);
+
+  useEffect(()=>{
+    if(!imageData){
+      setTexture(old=>{old?.dispose();return null;});
+      return;
+    }
+    let alive=true;
+    const loader=new THREE.TextureLoader();
+    loader.load(imageData,(next)=>{
+      if(!alive){next.dispose();return;}
+      next.colorSpace=THREE.SRGBColorSpace;
+      next.minFilter=THREE.LinearFilter;
+      next.needsUpdate=true;
+      setTexture(old=>{old?.dispose();return next;});
+    });
+    return()=>{alive=false;};
   },[imageData]);
 
   return (
@@ -29,7 +40,7 @@ export function CollaborativeWhiteboard(){
       </mesh>
       <mesh position={[0,1.55,0.06]} onClick={(e)=>{e.stopPropagation();open();}}>
         <planeGeometry args={[3.1,2.15]}/>
-        <meshBasicMaterial map={texture??undefined} color={texture?'#ffffff':'#f8fafc'} toneMapped={false}/>
+        <meshBasicMaterial map={texture??undefined} color={texture?'#ffffff':'#f8fafc'} toneMapped={false} side={THREE.DoubleSide}/>
       </mesh>
       {!texture&&(
         <Text position={[0,1.55,0.075]} fontSize={0.18} color="#64748b" anchorX="center" anchorY="middle" maxWidth={2.6} textAlign="center">
